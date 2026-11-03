@@ -1502,8 +1502,17 @@
     const spriteScale = pose.scale;
     ctx.save(); ctx.translate(Math.round(hero.x), Math.round(hero.y)); ctx.scale(hero.facing * spriteScale, spriteScale); ctx.imageSmoothingEnabled = false;
     if (pose.pivot) { ctx.translate(pose.worldPivot.x, pose.worldPivot.y); ctx.rotate(pose.rotation); ctx.translate(-pose.pivot.x, -pose.pivot.y); }
-    const jfFootOffset = ({ nib: 8, solan: 8 })[selectedCharacter] || 0;
-    ctx.drawImage(images.hero, r.x, r.y, r.w, r.h, -anchorX, -anchorY + jfFootOffset, r.w, r.h); ctx.restore();
+    const jfFootOffset = ({ nib: 0, solan: 0 })[selectedCharacter] || 0;
+    ctx.drawImage(images.hero, r.x, r.y, r.w, r.h, -anchorX, -anchorY + jfFootOffset, r.w, r.h);
+    // Bad Benny's Ultimate: weapon is attached to his forward hand and moves with the fighter.
+    if(selectedCharacter==='nib' && (hero.ultimateActive || hero.ultimateState || (hero.action||'').includes('ultimate'))){
+      const hx=8,hy=-104;
+      ctx.save();ctx.translate(hx,hy);
+      ctx.fillStyle='#2b302e';ctx.fillRect(-8,-7,70,11);ctx.fillStyle='#151a1b';ctx.fillRect(18,4,10,24);
+      ctx.fillStyle='#565d55';ctx.fillRect(-3,-10,28,4);ctx.fillStyle='#1b1b1b';ctx.fillRect(57,-5,27,4);
+      ctx.restore();
+    }
+    ctx.restore();
     if(delivery && delivery.owner==='player' && delivery.t<1.8)jfDrawMachineGun(hero);
   }
   function drawDummy() {
@@ -1512,7 +1521,7 @@
     if(!m||!img)return;
     const r=m.frame_layout.rows[pose.state][pose.frame];
     ctx.save();ctx.translate(Math.round(dummy.x),Math.round(dummy.y));ctx.scale(dummy.facing||-1,1);ctx.imageSmoothingEnabled=false;
-    const jfEnemyFootOffset = ({ nib: 8, solan: 8 })[opponentCharacter] || 0;
+    const jfEnemyFootOffset = ({ nib: 0, solan: 0 })[opponentCharacter] || 0;
     ctx.drawImage(img,r.x,r.y,r.w,r.h,-m.cell.width/2,-(m.cell.height-m.cell.safe_margin_y)+jfEnemyFootOffset,r.w,r.h);ctx.restore();
     if(enemyDelivery && enemyDelivery.owner==='enemy' && enemyDelivery.t<1.8)jfDrawMachineGun(dummy);
     if(dummy.action && !dummy.action.fired && dummy.action.type!=='ultimate') {
@@ -1817,8 +1826,8 @@
   }
   // Separate image downloads. A failed sprite reports an error; the menu stays interactive.
   const ESSENTIAL=[
-    ['stage-piazza','assets/menu/jf-nib-stage.webp?v=030'],
-    ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=030'],
+    ['stage-piazza','assets/menu/jf-nib-stage.webp?v=0301'],
+    ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=0301'],
     ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=025'],
     ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=025']
   ];
