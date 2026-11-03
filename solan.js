@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const balance = { cooldowns:{skill1:3,skill2:6,ultimate:18}, castTime:.5, roarDamage:16, basicRefund:.05 };
-  const names = ['FERRO E DISCIPLINA','LUFTWAFFE','REICH RALLY','WELTKRIEG'];
+  const names = ['IRON DISCIPLINE','AIR STRIKE','RALLYING CRY','TOTAL BARRAGE'];
   // Heavy greatsword chain: a little quicker than HALDOR's hammer, with big knockback. Reach sits inside the measured
   // blade tip (149/95/74 px in emitters.json; the cleave ends on the floor close in front of him).
   const combo = [

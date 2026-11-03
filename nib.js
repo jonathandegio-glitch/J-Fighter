@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const balance = { cooldowns:{skill1:3,skill2:6,ultimate:18}, castTime:.5, planeDamage:16, basicRefund:.05 };
-  const names = ['COMANDO DI FERRO','MARCIA SU ROMA','DISCORSO ALLA NAZIONE','DUCE BOMBER'];
+  const names = ['IRON COMMAND','MARCH ON ROME','NATIONAL ADDRESS','DUCE BOMBER'];
   // The fastest chain in the roster with the shortest reach (baton tips measured at 107/80/101 px in emitters.json);
   // small knockback keeps him close.
   const combo = [

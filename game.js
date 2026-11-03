@@ -15,7 +15,7 @@
     dummyMax:200, heroMax:200, hpPerBar:100, basicCooldownRefund:.05
   };
   const cooldownMax = { skill1:BALANCE.skill1.cooldown, skill2:BALANCE.skill2.cooldown, ultimate:BALANCE.ultimate.cooldown };
-  const skillNames = { skill1: 'AETHER BOLT', skill2: 'SEISMIC DRIVE', ultimate: 'HELIOS SQUADRON' };
+  const skillNames = { skill1: 'SPECIAL 1', skill2: 'SPECIAL 2', ultimate: 'ULTIMATE' };
   const images = {}, F = window.Fenr, M = window.Mira && window.MIRA_MANIFEST ? window.Mira : null, C = window.Cora && window.CORA_MANIFEST ? window.Cora : null, N = window.Naja && window.NAJA_MANIFEST ? window.Naja : null, HD = window.Haldor && window.HALDOR_MANIFEST ? window.Haldor : null, Z = window.Zanni && window.ZANNI_MANIFEST ? window.Zanni : null, IS = window.Isolde && window.ISOLDE_MANIFEST ? window.Isolde : null, RH = window.Rhea && window.RHEA_MANIFEST ? window.Rhea : null, SO = window.Solan && window.SOLAN_MANIFEST ? window.Solan : null, NB = window.Nib && window.NIB_MANIFEST ? window.Nib : null, ED = window.Edda && window.EDDA_MANIFEST ? window.Edda : null;
   // Kits that share one start/move/refund contract (mira.js, cora.js, naja.js, haldor.js, zanni.js, isolde.js, rhea.js, solan.js, nib.js, edda.js).
   const KITS = { ...(M ? { mira: M } : {}), ...(C ? { cora: C } : {}), ...(N ? { naja: N } : {}), ...(HD ? { haldor: HD } : {}), ...(Z ? { zanni: Z } : {}), ...(IS ? { isolde: IS } : {}), ...(RH ? { rhea: RH } : {}), ...(SO ? { solan: SO } : {}), ...(NB ? { nib: NB } : {}), ...(ED ? { edda: ED } : {}) };
@@ -180,8 +180,10 @@
     if(!ready||!Rules)return false;
     const {player='nib',enemy='solan',stage='piazza',level='medium',mode='versus'}=options;
     if(!playable().includes(player)||!playable().includes(enemy)||!Object.hasOwn(Rules.stages,stage)||!Object.hasOwn(Rules.difficulties,level)||!['versus','training'].includes(mode))return false;
+    if(!images['stage-'+stage]) images['stage-'+stage] = images.stage || images['stage-piazza'] || images['stage-tempesta'];
     if(!images['stage-'+stage])return false;
     selectedCharacter=player;opponentCharacter=enemy;stageId=stage;difficulty=level;images.stage=images['stage-'+stage];CONFIG.groundY=Rules.stages[stage].groundY;
+    syncPlayerForm();
     aiEnabled=mode==='versus';match=Rules.create(mode);roundCues.length=0;setMenuOpen(false);resetCombat();warmCutins();
     $('#ai-toggle').checked=aiEnabled;$('#character-select').value=selectedCharacter;document.body.classList.toggle('in-versus',mode==='versus');
     if(mode==='versus'){announceTimer=0;emitRoundCue('round',1);}else announce('TRAINING READY',1.3);
@@ -1401,7 +1403,7 @@
   }
 
   function drawBackground(shakeX, shakeY) {
-    const stage = images.stage;
+    const stage = images.stage || images['stage-piazza'] || images['stage-tempesta'];
     if (stage) {
       // Cover the viewport while aligning the measured stage floor with the combat floor.
       // Combat remains a uniform 16:9 projection, so fighters never stretch on tall screens.
@@ -1591,7 +1593,7 @@
     drawSquadron(); drawSquadron(enemySquad); drawParade(parade); drawParade(enemyParade); drawMurmuration(flock); drawMurmuration(enemyFlock); drawSerpent(serpent); drawSerpent(enemySerpent); drawEffects(); drawHitboxes(); ctx.restore(); updateHud();
   }
   function fighterInfo(id,form) {
-    if(id==='fenr'){const wolf=form==='wolf';return {name:'FENR',cls:wolf?'WEREWOLF':'DEMI-HUMAN',deck:wolf?'FENR · FERAL':'FENR',title:'WOLF RANGER',portrait:'assets/fenr/ui/portrait-'+(wolf?'wolf':'human')+'.webp',names:F.kits[wolf?'wolf':'human'].names,icons:['basic','skill1','skill2','ultimate'].map((s,i)=>'assets/fenr/ui/icon-'+(i===3?'ultimate':(wolf?'wolf':'human')+'-'+s)+'.webp')};}
+    if(id==='fenr'){const wolf=form==='wolf';return {name:'FENR',cls:wolf?'WEREWOLF':'DEMI-HUMAN',deck:wolf?'FENR · FERAL':'FENR',title:'AIR COMMAND',portrait:'assets/fenr/ui/portrait-'+(wolf?'wolf':'human')+'.webp',names:F.kits[wolf?'wolf':'human'].names,icons:['basic','skill1','skill2','ultimate'].map((s,i)=>'assets/fenr/ui/icon-'+(i===3?'ultimate':(wolf?'wolf':'human')+'-'+s)+'.webp')};}
     if(id==='cora')return {name:'CORA',cls:'DEMI-HUMAN',deck:'CORA',title:'SKY DANCER',portrait:'assets/cora/ui/portrait.webp',names:C.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/cora/ui/icon-'+s+'.webp')};
     if(id==='edda')return {name:'EDDA',cls:'DEMI-HUMAN',deck:'EDDA',title:'SHELL SAGE',portrait:'assets/edda/ui/portrait.webp',names:ED.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/edda/ui/icon-'+s+'.webp')};
     if(id==='nib')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'IRON ORDER',portrait:'assets/nib/ui/portrait.webp',names:NB.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/nib/ui/icon-'+s+'.webp')};
@@ -1602,10 +1604,9 @@
     if(id==='haldor')return {name:'HALDOR',cls:'MECHA',deck:'HALDOR',title:'WALKING FORGE',portrait:'assets/haldor/ui/portrait.webp',names:HD.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/haldor/ui/icon-'+s+'.webp')};
     if(id==='naja')return {name:'NAJA',cls:'DEMI-HUMAN',deck:'NAJA',title:'DUNE COBRA',portrait:'assets/naja/ui/portrait.webp',names:N.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/naja/ui/icon-'+s+'.webp')};
     if(id==='mira')return {name:'MIRA',cls:'MECHA',deck:'MIRA',title:'CANDY PILOT',portrait:'assets/mira/ui/portrait.webp',names:M.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/mira/ui/icon-'+s+'.webp')};
-    return {name:'ARCO',cls:'MECHA',deck:'ARCO',title:'AETHER ARM',portrait:'assets/ui/arco-avatar.webp',names:['IRON CHAIN','AETHER BOLT','SEISMIC DRIVE','HELIOS SQUADRON'],icons:['attack','skill1','skill2','squadron-icon'].map(s=>'assets/ui/'+s+'.webp')};
+    return {name:'ARCO',cls:'MECHA',deck:'ARCO',title:'IRON COMMAND',portrait:'assets/ui/arco-avatar.webp',names:['IRON CHAIN','AETHER BOLT','SEISMIC DRIVE','DUCE BOMBER'],icons:['attack','skill1','skill2','squadron-icon'].map(s=>'assets/ui/'+s+'.webp')};
   }
   function updateFighterIdentity() {
-    if(!F)return;
     const identity=selectedCharacter+':'+hero.form+':'+opponentCharacter+':'+dummy.form;
     if(identity!==hudIdentity) {
       hudIdentity=identity;const me=fighterInfo(selectedCharacter,hero.form),rival=fighterInfo(opponentCharacter,dummy.form);
@@ -1617,7 +1618,7 @@
       $('.fighter-two').setAttribute('aria-label','Status lawan '+opponentCharacter.toUpperCase());
       document.querySelectorAll('.skill-card').forEach((card,i)=>{card.querySelector('.skill-name').textContent=me.names[i];card.querySelector('img').src=me.icons[i];card.setAttribute('aria-label',me.names[i]+', '+['Spasi','I','O','P'][i]);});
     }
-    $('#player-status').textContent=selectedCharacter==='fenr'?(hero.form==='wolf'?'FERAL ACTIVE':'RANGER READY'):selectedCharacter==='mira'?'PILOT READY':selectedCharacter==='cora'?'WINGS READY':selectedCharacter==='naja'?'SANDS READY':selectedCharacter==='haldor'?'FURNACE HOT':selectedCharacter==='zanni'?'SHOWTIME':selectedCharacter==='isolde'?'LANCE READY':selectedCharacter==='rhea'?'ORBITS SET':selectedCharacter==='solan'?'PRIDE READY':selectedCharacter==='nib'?'ON THE ROUTE':selectedCharacter==='edda'?'STEADY AS STONE':'CORE ACTIVE';
+    $('#player-status').textContent=selectedCharacter==='fenr'?(hero.form==='wolf'?'FERAL ACTIVE':'RANGER READY'):selectedCharacter==='mira'?'PILOT READY':selectedCharacter==='cora'?'WINGS READY':selectedCharacter==='naja'?'SANDS READY':selectedCharacter==='haldor'?'FURNACE HOT':selectedCharacter==='zanni'?'SHOWTIME':selectedCharacter==='isolde'?'LANCE READY':selectedCharacter==='rhea'?'ORBITS SET':selectedCharacter==='solan'?'AIR COMMAND READY':selectedCharacter==='nib'?'COMMAND READY':selectedCharacter==='edda'?'STEADY AS STONE':'CORE ACTIVE';
     for(const [actor,id] of [[hero,'player-form-timer'],[dummy,'enemy-form-timer']]){const el=$('#'+id),active=actor.form==='wolf';el.hidden=!active;el.textContent=active?'FERAL  '+Math.max(0,actor.formTime).toFixed(1)+' s':'';el.style.setProperty?.('--remaining',String(actor.formTime/F.balance.duration));}
   }
   function updateHud() {
@@ -1707,7 +1708,8 @@
   function toggleFullscreen() { if (window.parent !== window) { try { if (window.parent.aetherFullscreen) { window.parent.aetherFullscreen(); return; } } catch (_) {} window.parent.postMessage({ type: 'aether-fullscreen' }, location.origin); return; } if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.(); }
   $('#fullscreen-btn').onclick = toggleFullscreen;
   for (const button of document.querySelectorAll('[data-action]')) button.onclick = () => { unlockAudio(); const name = button.dataset.action; if (name === 'attack') startAttack(); else cast(name); canvas.focus({ preventScroll: true }); };
-  function tick(stamp) { if (lastTime) { const elapsed = Math.min((stamp - lastTime) / 1000, .1); fps += (1 / Math.max(elapsed, .001) - fps) * .05; if (!window.__game?.manual) { accumulator += elapsed; while (accumulator >= 1 / 120) { step(1 / 120); accumulator -= 1 / 120; } } } lastTime = stamp; draw(); requestAnimationFrame(tick); }
+  let renderErrorLogged = false;
+  function tick(stamp) { try { if (lastTime) { const elapsed = Math.min((stamp - lastTime) / 1000, .1); fps += (1 / Math.max(elapsed, .001) - fps) * .05; if (!window.__game?.manual) { accumulator += elapsed; while (accumulator >= 1 / 120) { step(1 / 120); accumulator -= 1 / 120; } } } lastTime = stamp; draw(); } catch(err) { if(!renderErrorLogged){ console.error('[J-Fighter] Render error',err);renderErrorLogged=true;const notice=document.querySelector('#announcement');if(notice)notice.textContent='RENDER ERROR — CHECK CONSOLE'; } } requestAnimationFrame(tick); }
   // Deterministic QA interface: set manual=true, reset(), press/release(), advance(seconds).
   // Positions represent feet. No networking or persistent state is changed by this interface.
   window.__game = { hero, dummy, config: CONFIG, balance:BALANCE, particles, effects, projectiles, pose: heroPose, press: key => press(key, true), release, input(key, down) { if (down) press(key); else release(key); }, reset, cast, jump, attack: startAttack, clearInput, draw, manual: false,
@@ -1724,11 +1726,12 @@
   if(window.FRONTEND_ENABLED)setMenuOpen(true);
   resize(); requestAnimationFrame(tick);
   // Wait for the first-visit download (preload.js) so these requests are served from the cache, not fetched twice.
-  Promise.resolve(window.AETHER_PRELOAD).then(() => Promise.all([loadImage('hero', 'assets/mecha/run/sprite-sheet-alpha.webp', true), loadImage('stage', 'assets/menu/jf-nib-stage.webp', true), ...(Rules?Object.entries(Rules.stages).filter(([id])=>id!=='piazza').map(([id,s])=>loadImage('stage-'+id,s.image,true)):[]), ...(F?[loadImage('fenrHuman','assets/fenr/human/run/sprite-sheet-alpha.webp',true),loadImage('fenrWolf','assets/fenr/wolf/run/sprite-sheet-alpha.webp',true),...['claw','gale','rush','bite','howl','transform'].map(name=>loadImage('fx-'+name,'assets/fenr/ui/fx-'+name+'.webp',true))]:[]), ...(M?[loadImage('mira','assets/mira/run/sprite-sheet-alpha.webp',true),...['star','rocket','burst','crash'].map(name=>loadImage('fx-mira-'+name,'assets/mira/ui/fx-'+name+'.webp',true))]:[]), ...(C?[loadImage('cora','assets/cora/run/sprite-sheet-alpha.webp',true),...['feather','gust','raven'].map(name=>loadImage('fx-cora-'+name,'assets/cora/ui/fx-'+name+'.webp',true))]:[]), ...(N?[loadImage('naja','assets/naja/run/sprite-sheet-alpha.webp',true),...['sandwave','cyclone','serpent','ripple'].map(name=>loadImage('fx-naja-'+name,'assets/naja/ui/fx-'+name+'.webp',true))]:[]), ...(HD?[loadImage('haldor','assets/haldor/run/sprite-sheet-alpha.webp',true),...['slag','splash','steam','quake'].map(name=>loadImage('fx-haldor-'+name,'assets/haldor/ui/fx-'+name+'.webp',true))]:[]), ...(Z?[loadImage('zanni','assets/zanni/run/sprite-sheet-alpha.webp',true),...['ring','bigring','snatch','confetti'].map(name=>loadImage('fx-zanni-'+name,'assets/zanni/ui/fx-'+name+'.webp',true))]:[]), ...(IS?[loadImage('isolde','assets/isolde/run/sprite-sheet-alpha.webp',true),...['piercer','skyfall','shatter','frost'].map(name=>loadImage('fx-isolde-'+name,'assets/isolde/ui/fx-'+name+'.webp',true))]:[]), ...(RH?[loadImage('rhea','assets/rhea/run/sprite-sheet-alpha.webp',true),...['drift','planet','well','burst'].map(name=>loadImage('fx-rhea-'+name,'assets/rhea/ui/fx-'+name+'.webp',true))]:[]), ...(SO?[loadImage('solan','assets/solan/run/sprite-sheet-alpha.webp',true),...['crescent','roar','impact','sunburst'].map(name=>loadImage('fx-solan-'+name,'assets/solan/ui/fx-'+name+'.webp',true))]:[]), ...(NB?[loadImage('nib','assets/nib/run/sprite-sheet-alpha.webp',true),...['letter','plane','slip','stamp'].map(name=>loadImage('fx-nib-'+name,'assets/nib/ui/fx-'+name+'.webp',true))]:[]), ...(ED?[loadImage('edda','assets/edda/run/sprite-sheet-alpha.webp',true),...['stone','ripple','shell','tortoise','stomp'].map(name=>loadImage('fx-edda-'+name,'assets/edda/ui/fx-'+name+'.webp',true))]:[]), loadImage('drone', 'assets/ui/drone.png', true), loadImage('cutin', 'assets/ui/ultimate-cutin.webp', true)])).then(results => {
-    images['stage-piazza']=images['stage-piazza']||images.stage;images.arco=images.hero;if(F)syncPlayerForm();
-    ready = results.every(Boolean) && (!F || (!!window.FENR_HUMAN_MANIFEST && !!window.FENR_WOLF_MANIFEST)) && !!manifest && frames('idle').length > 0;
+  Promise.resolve(window.AETHER_PRELOAD).then(() => Promise.all([loadImage('hero', 'assets/mecha/run/sprite-sheet-alpha.webp', true), loadImage('stage', 'assets/menu/jf-nib-stage.webp', true), ...(Rules?Object.entries(Rules.stages).filter(([id])=>id!=='piazza').map(([id,s])=>loadImage('stage-'+id,s.image,true)):[]), ...(F?[]:[]), ...(M?[loadImage('mira','assets/mira/run/sprite-sheet-alpha.webp',true),...['star','rocket','burst','crash'].map(name=>loadImage('fx-mira-'+name,'assets/mira/ui/fx-'+name+'.webp',true))]:[]), ...(C?[loadImage('cora','assets/cora/run/sprite-sheet-alpha.webp',true),...['feather','gust','raven'].map(name=>loadImage('fx-cora-'+name,'assets/cora/ui/fx-'+name+'.webp',true))]:[]), ...(N?[loadImage('naja','assets/naja/run/sprite-sheet-alpha.webp',true),...['sandwave','cyclone','serpent','ripple'].map(name=>loadImage('fx-naja-'+name,'assets/naja/ui/fx-'+name+'.webp',true))]:[]), ...(HD?[loadImage('haldor','assets/haldor/run/sprite-sheet-alpha.webp',true),...['slag','splash','steam','quake'].map(name=>loadImage('fx-haldor-'+name,'assets/haldor/ui/fx-'+name+'.webp',true))]:[]), ...(Z?[loadImage('zanni','assets/zanni/run/sprite-sheet-alpha.webp',true),...['ring','bigring','snatch','confetti'].map(name=>loadImage('fx-zanni-'+name,'assets/zanni/ui/fx-'+name+'.webp',true))]:[]), ...(IS?[loadImage('isolde','assets/isolde/run/sprite-sheet-alpha.webp',true),...['piercer','skyfall','shatter','frost'].map(name=>loadImage('fx-isolde-'+name,'assets/isolde/ui/fx-'+name+'.webp',true))]:[]), ...(RH?[loadImage('rhea','assets/rhea/run/sprite-sheet-alpha.webp',true),...['drift','planet','well','burst'].map(name=>loadImage('fx-rhea-'+name,'assets/rhea/ui/fx-'+name+'.webp',true))]:[]), ...(SO?[loadImage('solan','assets/solan/run/sprite-sheet-alpha.webp',true),...['crescent','roar','impact','sunburst'].map(name=>loadImage('fx-solan-'+name,'assets/solan/ui/fx-'+name+'.webp',true))]:[]), ...(NB?[loadImage('nib','assets/nib/run/sprite-sheet-alpha.webp',true),...['letter','plane','slip','stamp'].map(name=>loadImage('fx-nib-'+name,'assets/nib/ui/fx-'+name+'.webp',true))]:[]), ...(ED?[loadImage('edda','assets/edda/run/sprite-sheet-alpha.webp',true),...['stone','ripple','shell','tortoise','stomp'].map(name=>loadImage('fx-edda-'+name,'assets/edda/ui/fx-'+name+'.webp',true))]:[]), loadImage('drone', 'assets/ui/drone.png', true), loadImage('cutin', 'assets/ui/ultimate-cutin.webp', true)])).then(results => {
+    images['stage-piazza']=images['stage-piazza']||images.stage;images['stage-tempesta']=images['stage-tempesta']||images['stage-piazza'];images.arco=images.hero;syncPlayerForm();
+    ready = !!images.stage && !!images.nib && !!images.solan && !!window.NIB_MANIFEST && !!window.SOLAN_MANIFEST;
+    if (!ready) console.error('[J-Fighter] Essential images missing', {stage:!!images.stage,benny:!!images.nib,general:!!images.solan});
     if (ready) { $('#load-state').classList.add('hidden'); announce('TRAINING READY', 1.65); }
-    else { $('#load-state').classList.add('error'); $('#load-message').textContent = 'Aset arena belum lengkap. Periksa atlas/manifest karakter, stage.webp, drone.png, dan ultimate-cutin.webp, lalu muat ulang.'; }
+    else { $('#load-state').classList.add('error'); $('#load-message').textContent = 'Game assets are missing. Refresh or check the uploaded character files.'; }
     window.FrontEnd?.assetsReady(ready);
   });
 })();
