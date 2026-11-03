@@ -217,7 +217,7 @@
     if(!Rules)return;
     const versus=match?.mode==='versus',s=Rules.stages[stageId];
     $('#mode-label').textContent=versus?`ROUND ${match.round} / 3`:'FREE TRAINING';$('#match-clock').textContent=versus?String(Math.ceil(match.seconds)).padStart(2,'0'):'∞';
-    $('.match-center').setAttribute('aria-label',versus?'Pertandingan, menang dua ronde dari maksimal tiga':'Mode latihan tanpa batas waktu');
+    $('.match-center').setAttribute('aria-label',versus?'Best of three rounds':'Unlimited training mode');
     $('#match-score').textContent=versus?`${match.playerWins} — ${match.enemyWins}`:'VS';$('#stage-name').textContent=s.short;$('#stage-subtitle').textContent=s.subtitle;
     $('#round-wins-player').textContent=versus?'◆'.repeat(match.playerWins)+'◇'.repeat(2-match.playerWins):'';$('#round-wins-enemy').textContent=versus?'◆'.repeat(match.enemyWins)+'◇'.repeat(2-match.enemyWins):'';
     const card=$('#round-call'),show=!menuOpen&&versus&&['intro','ko'].includes(match.phase);
@@ -708,11 +708,11 @@
     s.t += dt;
     while (s.released < U.releases.length && s.t >= U.releases[s.released]) {
       const last = s.released === U.releases.length - 1; s.released++;
-      const x = a.x + s.facing * 30, y = a.y - 110;
-      projectiles.push({ x, y, vx: s.facing * U.speed * .6, vy: -U.speed * .8, life: U.life, facing: s.facing, owner: s.owner, damage: NB.balance.planeDamage, knockback: last ? 180 : 40,
-        asset: 'nib-plane', size: U.size, color: '#8fd4ff', homing: true, speedH: U.speed, turn: U.turn, freeze: false });
-      effects.push({ type: 'nib-fx', asset: 'nib-stamp', x, y, facing: s.facing, life: .3, maxLife: .3, size: 130 });
-      spawnParticles(x, y, '#f4efe2', 10, 200); sound('cast');
+      const x = a.x + s.facing * 56, y = a.y - 94;
+      projectiles.push({ x, y, vx: s.facing * U.speed, vy: 0, life: 1.1, facing: s.facing, owner: s.owner, damage: 8, knockback: last ? 130 : 18,
+        asset: 'nib-plane', size: 95, color: '#ffb659', freeze: false });
+      effects.push({ type: 'muzzle', x, y, color:'#ffdf91', life: .13, maxLife: .13, heavy: last });
+      spawnParticles(x, y, '#eab769', 5, 160); sound('cast');
     }
     s.phase = s.t < U.cutinDuration ? 'cutin' : s.released < U.releases.length ? 'releasing' : 'flying';
     if (s.t >= U.duration && !projectiles.some(p => p.asset === 'nib-plane' && p.owner === s.owner)) { if (s.owner === 'enemy') enemyDelivery = null; else delivery = null; }
@@ -1103,6 +1103,7 @@
     if(move.buff){actor.jfBuff=6.0;effects.push({type:'nib-fx',asset:'nib-stamp',x:actor.x,y:actor.y-90,facing:actor.facing,life:.65,maxLife:.65,size:205});spawnParticles(actor.x,actor.y-85,'#f4c28e',28,150);sound('cast');return;}
     const enemy=actor===dummy,target=enemy?hero:dummy,em=window.NIB_METRICS?.emitters?.[move.name];
     const hy=clamp(actor.y+(em?.y??-80),actor.y-170,actor.y-40);
+    if(move.dash){effects.push({type:'nib-fx',asset:'nib-slip',x:actor.x-actor.facing*50,y:CONFIG.groundY-45,facing:actor.facing,life:.4,maxLife:.4,size:170});dust(actor.x,20);}
     if(move.projectile){
       // Express Letter: a sealed letter thrown flat at chest height; the fastest projectile, NB.letter.range px long.
       const x=actor.x+actor.facing*Math.round((em?.x??80)*.8),y=actor.y-90;
@@ -1449,6 +1450,11 @@
     result.frame = clamp(index, 0, Math.max(0, list.length - 1));
     return result;
   }
+  function jfDrawMachineGun(actor) {
+    const gun=images['fx-nib-gun'];if(!gun)return;
+    ctx.save();ctx.translate(actor.x+actor.facing*42,actor.y-107);ctx.scale(actor.facing,1);
+    ctx.imageSmoothingEnabled=false;ctx.drawImage(gun,-24,-35,172,87);ctx.restore();
+  }
   function drawHero() {
     shadow(hero.x, CONFIG.groundY, Math.max(19, (selectedCharacter === 'mira' ? 63 : selectedCharacter === 'haldor' ? 58 : 52) - (CONFIG.groundY - hero.y) * .07), .20);
     if (!images.hero || !manifest) return;
@@ -1460,6 +1466,7 @@
     ctx.save(); ctx.translate(Math.round(hero.x), Math.round(hero.y)); ctx.scale(hero.facing * spriteScale, spriteScale); ctx.imageSmoothingEnabled = false;
     if (pose.pivot) { ctx.translate(pose.worldPivot.x, pose.worldPivot.y); ctx.rotate(pose.rotation); ctx.translate(-pose.pivot.x, -pose.pivot.y); }
     ctx.drawImage(images.hero, r.x, r.y, r.w, r.h, -anchorX, -anchorY, r.w, r.h); ctx.restore();
+    if(delivery && delivery.owner==='player' && delivery.t<1.8)jfDrawMachineGun(hero);
   }
   function drawDummy() {
     const pose=opponentPose(),m=pose.manifest,img=images[opponentCharacter==='fenr'?(dummy.form==='wolf'?'fenrWolf':'fenrHuman'):opponentCharacter];
@@ -1468,6 +1475,7 @@
     const r=m.frame_layout.rows[pose.state][pose.frame];
     ctx.save();ctx.translate(Math.round(dummy.x),Math.round(dummy.y));ctx.scale(dummy.facing||-1,1);ctx.imageSmoothingEnabled=false;
     ctx.drawImage(img,r.x,r.y,r.w,r.h,-m.cell.width/2,-(m.cell.height-m.cell.safe_margin_y),r.w,r.h);ctx.restore();
+    if(enemyDelivery && enemyDelivery.owner==='enemy' && enemyDelivery.t<1.8)jfDrawMachineGun(dummy);
     if(dummy.action && !dummy.action.fired && dummy.action.type!=='ultimate') {
       ctx.save();ctx.strokeStyle='#f0b15e';ctx.lineWidth=2;ctx.globalAlpha=.7;
       ctx.beginPath();ctx.ellipse(dummy.x,CONFIG.groundY+3,37,7,0,0,Math.PI*2);ctx.stroke();ctx.restore();
@@ -1475,7 +1483,18 @@
   }
   function drawEffects() {
     for (const p of projectiles) {
-      if(p.asset && images['fx-'+p.asset]){const w=p.size||84,h=p.size||76;ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.facing,1);if(p.vy)ctx.rotate(Math.atan2(p.vy,Math.abs(p.vx)));if(p.spin)ctx.rotate(realTime*p.spin);ctx.drawImage(images['fx-'+p.asset],-w/2,-h/2,w,h);ctx.restore();continue;}
+      if(p.asset && images['fx-'+p.asset]){
+        const air=p.asset==='solan-crescent'||p.asset==='solan-roar';
+        const gun=p.asset==='nib-plane'||p.asset==='nib-letter';
+        const w=air?210:gun?115:p.size||84,h=air?105:gun?45:p.size||76;
+        ctx.save();ctx.translate(p.x,air?p.y-120:p.y);ctx.scale(p.facing,1);
+        // Bombers stay overhead, while their projectile hit-box remains at fighter height.
+        if(p.vy&&!air)ctx.rotate(Math.atan2(p.vy,Math.abs(p.vx)));
+        if(p.spin)ctx.rotate(realTime*p.spin);
+        if(air){ctx.globalAlpha=.27;ctx.fillStyle='#dcd2aa';ctx.fillRect(-85,48,135,3);ctx.globalAlpha=1;}
+        if(gun){const flash=8+Math.sin(realTime*55)*5;ctx.fillStyle='#ffc05a';ctx.fillRect(-72,-3,18+flash,4);ctx.fillStyle='#fff6c5';ctx.fillRect(-30,-2,flash+6,3);}
+        ctx.drawImage(images['fx-'+p.asset],-w/2,-h/2,w,h);ctx.restore();continue;
+      }
       ctx.save(); ctx.translate(Math.round(p.x), Math.round(p.y)); ctx.scale(p.facing, 1);
       const glow = ctx.createLinearGradient(-75, 0, 15, 0); glow.addColorStop(0, '#73f2dd00'); glow.addColorStop(1, '#affff1bb'); ctx.fillStyle = glow; ctx.beginPath(); ctx.moveTo(-80, -5); ctx.lineTo(10, -11); ctx.lineTo(25, 0); ctx.lineTo(10, 11); ctx.lineTo(-80, 5); ctx.fill();
       ctx.fillStyle = '#234f55'; ctx.fillRect(-17, -8, 31, 16); ctx.fillStyle = '#97b4ad'; ctx.fillRect(-14, -6, 29, 11); ctx.fillStyle = '#dbe4c7'; ctx.fillRect(-12, -6, 25, 3); ctx.fillStyle = '#98723f'; ctx.fillRect(-18, -9, 6, 18); ctx.fillStyle = '#efcc84'; ctx.fillRect(-17, -8, 3, 16); ctx.fillStyle = '#71d9c8'; ctx.beginPath(); ctx.moveTo(13, -6); ctx.lineTo(23, 0); ctx.lineTo(13, 7); ctx.fill(); ctx.restore();
@@ -1597,8 +1616,8 @@
     if(id==='fenr'){const wolf=form==='wolf';return {name:'FENR',cls:wolf?'WEREWOLF':'DEMI-HUMAN',deck:wolf?'FENR · FERAL':'FENR',title:'AIR COMMAND',portrait:'assets/fenr/ui/portrait-'+(wolf?'wolf':'human')+'.webp',names:F.kits[wolf?'wolf':'human'].names,icons:['basic','skill1','skill2','ultimate'].map((s,i)=>'assets/fenr/ui/icon-'+(i===3?'ultimate':(wolf?'wolf':'human')+'-'+s)+'.webp')};}
     if(id==='cora')return {name:'CORA',cls:'DEMI-HUMAN',deck:'CORA',title:'SKY DANCER',portrait:'assets/cora/ui/portrait.webp',names:C.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/cora/ui/icon-'+s+'.webp')};
     if(id==='edda')return {name:'EDDA',cls:'DEMI-HUMAN',deck:'EDDA',title:'SHELL SAGE',portrait:'assets/edda/ui/portrait.webp',names:ED.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/edda/ui/icon-'+s+'.webp')};
-    if(id==='nib')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'IRON ORDER',portrait:'assets/nib/ui/portrait.webp',names:NB.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/nib/ui/icon-'+s+'.webp')};
-    if(id==='solan')return {name:'GENERAL H.H.',cls:'GENERAL',deck:'GENERAL H.H.',title:'AIR COMMAND',portrait:'assets/solan/ui/portrait.webp',names:SO.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/solan/ui/icon-'+s+'.webp')};
+    if(id==='nib')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'IRON ORDER',portrait:'assets/nib/ui/portrait.webp',names:NB.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/nib/ui/icon-'+s+'.webp?v=027')};
+    if(id==='solan')return {name:'GENERAL H.H.',cls:'GENERAL',deck:'GENERAL H.H.',title:'AIR COMMAND',portrait:'assets/solan/ui/portrait.webp',names:SO.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/solan/ui/icon-'+s+'.webp?v=027')};
     if(id==='rhea')return {name:'RHEA',cls:'MECHA',deck:'RHEA',title:'LITTLE ORRERY',portrait:'assets/rhea/ui/portrait.webp',names:RH.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/rhea/ui/icon-'+s+'.webp')};
     if(id==='isolde')return {name:'ISOLDE',cls:'MECHA',deck:'ISOLDE',title:'WHITE STRIDER',portrait:'assets/isolde/ui/portrait.webp',names:IS.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/isolde/ui/icon-'+s+'.webp')};
     if(id==='zanni')return {name:'ZANNI',cls:'MECHA',deck:'ZANNI',title:'CLOCKWORK JESTER',portrait:'assets/zanni/ui/portrait.webp',names:Z.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/zanni/ui/icon-'+s+'.webp')};
@@ -1614,9 +1633,9 @@
       $('#player-name').textContent=me.name;$('#player-class').textContent=me.cls;$('#deck-character').textContent=me.deck;
       $('#player-title').textContent=me.title;
       $('#player-portrait').src=me.portrait;$('#player-portrait').alt='Portrait '+me.name;
-      $('#enemy-portrait').src=rival.portrait;$('#enemy-portrait').alt='Portrait '+opponentCharacter.toUpperCase();$('#enemy-class').textContent=rival.cls;
-      $('#enemy-name').textContent=opponentCharacter.toUpperCase();$('#enemy-title').textContent=rival.title;
-      $('.fighter-two').setAttribute('aria-label','Status lawan '+opponentCharacter.toUpperCase());
+      $('#enemy-portrait').src=rival.portrait;$('#enemy-portrait').alt='Portrait '+rival.name;$('#enemy-class').textContent=rival.cls;
+      $('#enemy-name').textContent=rival.name;$('#enemy-title').textContent=rival.title;
+      $('.fighter-two').setAttribute('aria-label','Opponent status '+rival.name);
       document.querySelectorAll('.skill-card').forEach((card,i)=>{card.querySelector('.skill-name').textContent=me.names[i];card.querySelector('img').src=me.icons[i];card.setAttribute('aria-label',me.names[i]+', '+['Spasi','I','O','P'][i]);});
     }
     $('#player-status').textContent=selectedCharacter==='fenr'?(hero.form==='wolf'?'FERAL ACTIVE':'RANGER READY'):selectedCharacter==='mira'?'PILOT READY':selectedCharacter==='cora'?'WINGS READY':selectedCharacter==='naja'?'SANDS READY':selectedCharacter==='haldor'?'FURNACE HOT':selectedCharacter==='zanni'?'SHOWTIME':selectedCharacter==='isolde'?'LANCE READY':selectedCharacter==='rhea'?'ORBITS SET':selectedCharacter==='solan'?'AIR COMMAND READY':selectedCharacter==='nib'?'COMMAND READY':selectedCharacter==='edda'?'STEADY AS STONE':'CORE ACTIVE';
@@ -1673,7 +1692,7 @@
     const ct=fenrCutin?.t ?? (arcoGroup||summon)?.t ?? 100;
     cutin.classList.toggle('fenr-cutin',cutinKey==='fenr');cutin.classList.toggle('mira-cutin',cutinKey==='mira');cutin.classList.toggle('cora-cutin',cutinKey==='cora');cutin.classList.toggle('naja-cutin',cutinKey==='naja');cutin.classList.toggle('haldor-cutin',cutinKey==='haldor');cutin.classList.toggle('zanni-cutin',cutinKey==='zanni');cutin.classList.toggle('isolde-cutin',cutinKey==='isolde');cutin.classList.toggle('rhea-cutin',cutinKey==='rhea');cutin.classList.toggle('solan-cutin',cutinKey==='solan');cutin.classList.toggle('nib-cutin',cutinKey==='nib');cutin.classList.toggle('edda-cutin',cutinKey==='edda');
     const cutinArt=cutin.querySelector('.cutin-art'),cutinOwner=cutinKey==='fenr'?fenrCutin.owner:cutinKey==='mira'||cutinKey==='cora'||cutinKey==='naja'||cutinKey==='haldor'||cutinKey==='zanni'||cutinKey==='isolde'||cutinKey==='rhea'||cutinKey==='solan'||cutinKey==='nib'||cutinKey==='edda'?(summon.owner==='enemy'?'RIVAL':'PLAYER'):'';
-    if(cutin.dataset.identity!==cutinKey+cutinOwner){cutin.dataset.identity=cutinKey+cutinOwner;cutinArt.src=CUTIN_ART[cutinKey];if(cutinArt.complete)cutinArt.style.visibility='';else{cutinArt.style.visibility='hidden';cutinArt.onload=()=>{cutinArt.style.visibility='';};}cutin.querySelector('.cutin-kicker').textContent={fenr:'FENR / '+cutinOwner,mira:'MIRA / '+cutinOwner,cora:'CORA / '+cutinOwner,naja:'NAJA / '+cutinOwner,haldor:'HALDOR / '+cutinOwner,zanni:'ZANNI / '+cutinOwner,isolde:'ISOLDE / '+cutinOwner,rhea:'RHEA / '+cutinOwner,solan:'GENERAL H.H. / '+cutinOwner,nib:'BAD BENNY / '+cutinOwner,edda:'EDDA / '+cutinOwner,arco:'ARCO / AETHER COMMAND'}[cutinKey];cutin.querySelector('strong').innerHTML={fenr:'FERAL<br><em>AWAKENING</em>',mira:'ROCKET<br><em>PARADE</em>',cora:'NIGHT<br><em>MURMURATION</em>',naja:'DUNE<br><em>SERPENT</em>',haldor:'FORGE<br><em>QUAKE</em>',zanni:'GRAND<br><em>FINALE</em>',isolde:'SKYFALL<br><em>LANCES</em>',rhea:'GRAND<br><em>ORRERY</em>',solan:'WELT<br><em>KRIEG</em>',nib:'DUCE<br><em>BOMBER</em>',edda:'ELDER<br><em>TORTOISE</em>',arco:'HELIOS<br><em>SQUADRON</em>'}[cutinKey];cutin.querySelector('.cutin-detail').textContent={fenr:'THE BEAST WITHIN',mira:'TWELVE-ROCKET SALVO',cora:'THREE-PASS RAVEN STORM',naja:'THREE-STRIKE SAND COBRA',haldor:'THREE-SLAM MOLTEN SHOCKWAVE',zanni:'THREE-RING BLADE BOOMERANG',isolde:'THREE-LANCE ICE DIVE',rhea:'THREE-PLANET ORBIT',solan:'THREE-WAVE BARRAGE',nib:'THREE-WAVE AIR RAID',edda:'THREE-STOMP SPIRIT WALK',arco:'ORBITAL LASER STRIKE'}[cutinKey];cutin.setAttribute('aria-label',{fenr:'FENR ultimate: Feral Awakening',mira:'MIRA ultimate: Rocket Parade',cora:'CORA ultimate: Night Murmuration',naja:'NAJA ultimate: Dune Serpent',haldor:'HALDOR ultimate: Forge Quake',zanni:'ZANNI ultimate: Grand Finale',isolde:'ISOLDE ultimate: Skyfall Lances',rhea:'RHEA ultimate: Grand Orrery',solan:'General H.H. ultimate: Weltkrieg',nib:'Bad Benny ultimate: Duce Bomber',edda:'EDDA ultimate: Elder Tortoise',arco:'ARCO ultimate: Helios Squadron'}[cutinKey]);}
+    if(cutin.dataset.identity!==cutinKey+cutinOwner){cutin.dataset.identity=cutinKey+cutinOwner;cutinArt.src=CUTIN_ART[cutinKey];if(cutinArt.complete)cutinArt.style.visibility='';else{cutinArt.style.visibility='hidden';cutinArt.onload=()=>{cutinArt.style.visibility='';};}cutin.querySelector('.cutin-kicker').textContent={fenr:'FENR / '+cutinOwner,mira:'MIRA / '+cutinOwner,cora:'CORA / '+cutinOwner,naja:'NAJA / '+cutinOwner,haldor:'HALDOR / '+cutinOwner,zanni:'ZANNI / '+cutinOwner,isolde:'ISOLDE / '+cutinOwner,rhea:'RHEA / '+cutinOwner,solan:'GENERAL H.H. / '+cutinOwner,nib:'BAD BENNY / '+cutinOwner,edda:'EDDA / '+cutinOwner,arco:'ARCO / AETHER COMMAND'}[cutinKey];cutin.querySelector('strong').innerHTML={fenr:'FERAL<br><em>AWAKENING</em>',mira:'ROCKET<br><em>PARADE</em>',cora:'NIGHT<br><em>MURMURATION</em>',naja:'DUNE<br><em>SERPENT</em>',haldor:'FORGE<br><em>QUAKE</em>',zanni:'GRAND<br><em>FINALE</em>',isolde:'SKYFALL<br><em>LANCES</em>',rhea:'GRAND<br><em>ORRERY</em>',solan:'WELT<br><em>KRIEG</em>',nib:'DUCE<br><em>BOMBER</em>',edda:'ELDER<br><em>TORTOISE</em>',arco:'HELIOS<br><em>SQUADRON</em>'}[cutinKey];cutin.querySelector('.cutin-detail').textContent={fenr:'THE BEAST WITHIN',mira:'TWELVE-ROCKET SALVO',cora:'THREE-PASS RAVEN STORM',naja:'THREE-STRIKE SAND COBRA',haldor:'THREE-SLAM MOLTEN SHOCKWAVE',zanni:'THREE-RING BLADE BOOMERANG',isolde:'THREE-LANCE ICE DIVE',rhea:'THREE-PLANET ORBIT',solan:'THREE AIRCRAFT STRIKE WAVES',nib:'HEAVY MACHINE-GUN BARRAGE',edda:'THREE-STOMP SPIRIT WALK',arco:'ORBITAL LASER STRIKE'}[cutinKey];cutin.setAttribute('aria-label',{fenr:'FENR ultimate: Feral Awakening',mira:'MIRA ultimate: Rocket Parade',cora:'CORA ultimate: Night Murmuration',naja:'NAJA ultimate: Dune Serpent',haldor:'HALDOR ultimate: Forge Quake',zanni:'ZANNI ultimate: Grand Finale',isolde:'ISOLDE ultimate: Skyfall Lances',rhea:'RHEA ultimate: Grand Orrery',solan:'General H.H. ultimate: Weltkrieg',nib:'Bad Benny ultimate: Duce Bomber',edda:'EDDA ultimate: Elder Tortoise',arco:'ARCO ultimate: Helios Squadron'}[cutinKey]);}
     const visible = ct < SQUAD.cutinDuration;
     cutin.classList.toggle('visible', visible); cutin.setAttribute('aria-hidden', String(!visible));
     const slide = !visible ? -110 : ct < .16 ? -110 * Math.pow(1 - ct / .16,3) : ct > .57 ? 110 * Math.pow((ct-.57)/.21,2) : 0;
@@ -1744,8 +1763,8 @@
   }
   // Separate image downloads. A failed sprite reports an error; the menu stays interactive.
   const ESSENTIAL=[
-    ['stage-piazza','assets/menu/jf-nib-stage.webp?v=025'],
-    ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=025'],
+    ['stage-piazza','assets/menu/jf-nib-stage.webp?v=027'],
+    ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=027'],
     ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=025'],
     ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=025']
   ];
@@ -1762,8 +1781,8 @@
     }).catch(err=>console.error('[J-Fighter] Resource failure:',path,err));
   });
   const optional=[['drone','assets/ui/drone.png'],['cutin','assets/ui/ultimate-cutin.webp'],
-    ...['crescent','roar','impact','sunburst'].map(n=>['fx-solan-'+n,'assets/solan/ui/fx-'+n+'.webp']),
-    ...['letter','plane','slip','stamp'].map(n=>['fx-nib-'+n,'assets/nib/ui/fx-'+n+'.webp'])];
+    ...['crescent','roar','impact','sunburst'].map(n=>['fx-solan-'+n,'assets/solan/ui/fx-'+n+'.webp?v=027']),
+    ...['letter','plane','slip','stamp','gun'].map(n=>['fx-nib-'+n,'assets/nib/ui/fx-'+n+'.webp?v=027'])];
   optional.forEach(([key,path])=>loadImage(key,path,false));
 
 })();

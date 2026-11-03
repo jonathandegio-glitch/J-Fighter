@@ -12,8 +12,8 @@
     excellent:{label:'Excellent',speed:1.32,recovery:.12,reaction:.08,combo:3,skillEvery:1,ultimateAfter:3.5,aggression:.97,evade:.92,punish:.95,antiAir:.9,ender:1,mistakes:0,wake:.02,immunity:.9,comboCap:4}
   };
   const stages={
-    piazza:{name:'Duel Plaza',short:'PLAZA',subtitle:'DUEL',image:'assets/menu/jf-nib-stage.webp',groundY:599,tag:'Bad Benny · monumental plaza',time:'SUNSET'},
-    tempesta:{name:'Storm Plaza',short:'STORM',subtitle:'PLAZA',image:'assets/menu/jf-solan-stage.webp',groundY:599,tag:'General H.H. · night setting',time:'NIGHT'}
+    piazza:{name:'Duel Plaza',short:'PLAZA',subtitle:'DUEL',image:'assets/menu/jf-nib-stage.webp?v=027',groundY:599,tag:'Bad Benny · monumental plaza',time:'SUNSET'},
+    tempesta:{name:'Storm Plaza',short:'STORM',subtitle:'PLAZA',image:'assets/menu/jf-solan-stage.webp?v=027',groundY:599,tag:'General H.H. · night setting',time:'NIGHT'}
   };
   function introTiming(m){const clips=window.ANNOUNCER_MANIFEST?.clips;m.fightAt=Math.max(1.05,(clips?.['round_'+m.round]?.duration||0)+.12);m.introDuration=Math.max(1.85,m.fightAt+(clips?.fight?.duration||0)+.10);}
   function create(mode='training') {const m={mode,phase:mode==='versus'?'intro':'fight',round:1,playerWins:0,enemyWins:0,seconds:90,phaseTime:0,fightCue:false,lastWinner:null,winner:null,koDuration:2.2};introTiming(m);return m;}

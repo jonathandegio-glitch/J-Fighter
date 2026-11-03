@@ -1,7 +1,7 @@
 /* Shared NIB moves (mouse demi-human courier, twin batons): player and AI use the same rules. */
 (() => {
   'use strict';
-  const balance = { cooldowns:{skill1:3,skill2:6,ultimate:18}, castTime:.5, planeDamage:16, basicRefund:.05 };
+  const balance = { cooldowns:{skill1:3,skill2:6,ultimate:18}, castTime:.5, planeDamage:8, basicRefund:.05 };
   const names = ['IRON COMMAND','MARCH ON ROME','NATIONAL ADDRESS','DUCE BOMBER'];
   // The fastest chain in the roster with the shortest reach (baton tips measured at 107/80/101 px in emitters.json);
   // small knockback keeps him close.
@@ -17,7 +17,7 @@
   // Special Delivery: three paper-plane parcels leave the satchel 0.38 s apart (inside the 0.42 s hurt stun) and home
   // in on the rival at `speed` px/s, turning at most `turn` rad/s. Each hits once for 16 (48). A late sidestep or jump
   // makes a plane overshoot, and it gives up after `life` s.
-  const delivery = { cutinDuration:.78, releases:[.8,1.18,1.56], speed:540, turn:4.2, life:2.4, size:125, duration:2.7 };
+  const delivery = { cutinDuration:.78, releases:[.7,.84,.98,1.12,1.26,1.4,1.54,1.68], speed:1250, turn:0, life:1.1, size:95, duration:2.4 };
   function move(name,index=1) {
     if(name==='attack')return {name:`attack${index}`,type:'attack',index,...combo[index-1]};
     if(name==='skill1')return {name,type:name,damage:19,duration:.64,knockback:220,reach:146,dash:610,hitAt:.45};
