@@ -1497,7 +1497,7 @@
     if (!images.hero || !manifest) return;
     let list = frames(hero.state); if (!list.length) list = frames('idle'); if (!list.length) return;
     const pose = heroPose(), index = pose.frame;
-    const r = list[index], cw = manifest.cell?.width || manifest.cell?.w || r.w, ch = manifest.cell?.height || manifest.cell?.h || r.h;
+    const r = list[index] || frames('idle')[0]; if (!r || !Number.isFinite(r.x) || !Number.isFinite(r.y)) return; const cw = manifest.cell?.width || manifest.cell?.w || r.w, ch = manifest.cell?.height || manifest.cell?.h || r.h;
     const anchorX = manifest.cell?.anchor_x ?? cw / 2, anchorY = manifest.cell?.anchor_y ?? ch - (manifest.cell?.safe_margin_y || 0);
     const spriteScale = pose.scale;
     ctx.save(); ctx.translate(Math.round(hero.x), Math.round(hero.y)); ctx.scale(hero.facing * spriteScale, spriteScale); ctx.imageSmoothingEnabled = false;
@@ -1519,7 +1519,7 @@
     const pose=opponentPose(),m=pose.manifest,img=images[opponentCharacter==='fenr'?(dummy.form==='wolf'?'fenrWolf':'fenrHuman'):opponentCharacter];
     shadow(dummy.x,CONFIG.groundY,dummy.state==='down'?65:opponentCharacter==='mira'?61:opponentCharacter==='haldor'?55:43,.20);
     if(!m||!img)return;
-    const r=m.frame_layout.rows[pose.state][pose.frame];
+    const r=m.frame_layout?.rows?.[pose.state]?.[pose.frame] || m.frame_layout?.rows?.idle?.[0]; if(!r || !Number.isFinite(r.x) || !Number.isFinite(r.y))return;
     ctx.save();ctx.translate(Math.round(dummy.x),Math.round(dummy.y));ctx.scale(dummy.facing||-1,1);ctx.imageSmoothingEnabled=false;
     const jfEnemyFootOffset = ({ nib: 0, solan: 0 })[opponentCharacter] || 0;
     ctx.drawImage(img,r.x,r.y,r.w,r.h,-m.cell.width/2,-(m.cell.height-m.cell.safe_margin_y)+jfEnemyFootOffset,r.w,r.h);ctx.restore();
@@ -1828,8 +1828,8 @@
   const ESSENTIAL=[
     ['stage-piazza','assets/menu/jf-nib-stage.webp?v=0301'],
     ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=0301'],
-    ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=025'],
-    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=025']
+    ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=031'],
+    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=031']
   ];
   const faults=[];
   ESSENTIAL.forEach(([key,path])=>{
