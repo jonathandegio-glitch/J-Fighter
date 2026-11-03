@@ -1,1 +1,0 @@
-window.STAGE_CONFIG = {"width": 1280, "height": 720, "groundY": 599, "floorBand": [530, 719], "name": "J-Fighter Piazza del Duello", "source": "Original procedural artwork", "measurement": "the feet line 599 lies inside stone plaza floor band 530-719"};
