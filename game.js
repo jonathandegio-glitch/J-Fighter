@@ -1725,13 +1725,58 @@
   if(F)reset();
   if(window.FRONTEND_ENABLED)setMenuOpen(true);
   resize(); requestAnimationFrame(tick);
-  // Wait for the first-visit download (preload.js) so these requests are served from the cache, not fetched twice.
-  Promise.resolve(window.AETHER_PRELOAD).then(() => Promise.all([loadImage('hero', 'assets/mecha/run/sprite-sheet-alpha.webp', true), loadImage('stage', 'assets/menu/jf-nib-stage.webp', true), ...(Rules?Object.entries(Rules.stages).filter(([id])=>id!=='piazza').map(([id,s])=>loadImage('stage-'+id,s.image,true)):[]), ...(F?[]:[]), ...(M?[loadImage('mira','assets/mira/run/sprite-sheet-alpha.webp',true),...['star','rocket','burst','crash'].map(name=>loadImage('fx-mira-'+name,'assets/mira/ui/fx-'+name+'.webp',true))]:[]), ...(C?[loadImage('cora','assets/cora/run/sprite-sheet-alpha.webp',true),...['feather','gust','raven'].map(name=>loadImage('fx-cora-'+name,'assets/cora/ui/fx-'+name+'.webp',true))]:[]), ...(N?[loadImage('naja','assets/naja/run/sprite-sheet-alpha.webp',true),...['sandwave','cyclone','serpent','ripple'].map(name=>loadImage('fx-naja-'+name,'assets/naja/ui/fx-'+name+'.webp',true))]:[]), ...(HD?[loadImage('haldor','assets/haldor/run/sprite-sheet-alpha.webp',true),...['slag','splash','steam','quake'].map(name=>loadImage('fx-haldor-'+name,'assets/haldor/ui/fx-'+name+'.webp',true))]:[]), ...(Z?[loadImage('zanni','assets/zanni/run/sprite-sheet-alpha.webp',true),...['ring','bigring','snatch','confetti'].map(name=>loadImage('fx-zanni-'+name,'assets/zanni/ui/fx-'+name+'.webp',true))]:[]), ...(IS?[loadImage('isolde','assets/isolde/run/sprite-sheet-alpha.webp',true),...['piercer','skyfall','shatter','frost'].map(name=>loadImage('fx-isolde-'+name,'assets/isolde/ui/fx-'+name+'.webp',true))]:[]), ...(RH?[loadImage('rhea','assets/rhea/run/sprite-sheet-alpha.webp',true),...['drift','planet','well','burst'].map(name=>loadImage('fx-rhea-'+name,'assets/rhea/ui/fx-'+name+'.webp',true))]:[]), ...(SO?[loadImage('solan','assets/solan/run/sprite-sheet-alpha.webp',true),...['crescent','roar','impact','sunburst'].map(name=>loadImage('fx-solan-'+name,'assets/solan/ui/fx-'+name+'.webp',true))]:[]), ...(NB?[loadImage('nib','assets/nib/run/sprite-sheet-alpha.webp',true),...['letter','plane','slip','stamp'].map(name=>loadImage('fx-nib-'+name,'assets/nib/ui/fx-'+name+'.webp',true))]:[]), ...(ED?[loadImage('edda','assets/edda/run/sprite-sheet-alpha.webp',true),...['stone','ripple','shell','tortoise','stomp'].map(name=>loadImage('fx-edda-'+name,'assets/edda/ui/fx-'+name+'.webp',true))]:[]), loadImage('drone', 'assets/ui/drone.png', true), loadImage('cutin', 'assets/ui/ultimate-cutin.webp', true)])).then(results => {
-    images['stage-piazza']=images['stage-piazza']||images.stage;images['stage-tempesta']=images['stage-tempesta']||images['stage-piazza'];images.arco=images.hero;syncPlayerForm();
-    ready = !!images.stage && !!images.nib && !!images.solan && !!window.NIB_MANIFEST && !!window.SOLAN_MANIFEST;
-    if (!ready) console.error('[J-Fighter] Essential images missing', {stage:!!images.stage,benny:!!images.nib,general:!!images.solan});
-    if (ready) { $('#load-state').classList.add('hidden'); announce('TRAINING READY', 1.65); }
-    else { $('#load-state').classList.add('error'); $('#load-message').textContent = 'Game assets are missing. Refresh or check the uploaded character files.'; }
-    window.FrontEnd?.assetsReady(ready);
-  });
+  // J-Fighter Alpha 0.2.2: make boot depend only on essential fighter/stage sprites.
+  // Decorative FX load independently; one missing effect must never block all gameplay.
+  const ESSENTIAL = [
+    ['stage-piazza', 'assets/menu/jf-nib-stage.webp'],
+    ['stage-tempesta', 'assets/menu/jf-solan-stage.webp'],
+    ['nib', 'assets/nib/run/sprite-sheet-alpha.webp'],
+    ['solan', 'assets/solan/run/sprite-sheet-alpha.webp']
+  ];
+  const missingAssets = [];
+  function reportLoadFailure(message) {
+    console.error('[J-Fighter] Initialization:', message);
+    const screen = $('#load-state'), label = $('#load-message');
+    if (screen) screen.classList.add('error');
+    if (label) label.textContent = message;
+    window.FrontEnd?.assetsReady(false);
+  }
+  // Each image load has a deadline so a stalled network request cannot hang the game forever.
+  function loadEssential(key, path) {
+    return Promise.race([
+      loadImage(key, path, true),
+      new Promise(resolve => setTimeout(() => resolve(false), 12000))
+    ]).then(ok => {
+      if (!ok || !images[key]) missingAssets.push(path);
+      return ok;
+    });
+  }
+  Promise.all(ESSENTIAL.map(([key, path]) => loadEssential(key, path)))
+    .then(() => {
+      if (missingAssets.length) {
+        reportLoadFailure('MISSING GAME FILE: ' + missingAssets.join(' | ') + '. Check GitHub upload and reload.');
+        return;
+      }
+      images.stage = images['stage-piazza'];
+      images.arco = images.hero;
+      ready = !!window.NIB_MANIFEST && !!window.SOLAN_MANIFEST && !!NB && !!SO && !!Rules;
+      if (!ready) {
+        reportLoadFailure('CHARACTER SCRIPT ERROR: check assets/nib/manifest.js, assets/solan/manifest.js, nib.js, solan.js and match.js');
+        return;
+      }
+      syncPlayerForm();
+      const screen = $('#load-state'); if (screen) screen.classList.add('hidden');
+      announce('TRAINING READY', 1.65);
+      window.FrontEnd?.assetsReady(true);
+      // Non-essential assets: load in background, never block the UI.
+      const optional = [
+        ['hero', 'assets/mecha/run/sprite-sheet-alpha.webp'],
+        ['drone', 'assets/ui/drone.png'],
+        ['cutin', 'assets/ui/ultimate-cutin.webp'],
+        ...['crescent','roar','impact','sunburst'].map(n => ['fx-solan-'+n,'assets/solan/ui/fx-'+n+'.webp']),
+        ...['letter','plane','slip','stamp'].map(n => ['fx-nib-'+n,'assets/nib/ui/fx-'+n+'.webp'])
+      ];
+      optional.forEach(([key,path]) => loadImage(key,path,false).catch(err => console.warn('[J-Fighter] Optional art unavailable',path,err)));
+    })
+    .catch(err => reportLoadFailure('STARTUP ERROR: ' + (err?.message || String(err))));
 })();
