@@ -180,8 +180,10 @@
     if(!ready||!Rules)return false;
     const {player='nib',enemy='solan',stage='piazza',level='medium',mode='versus'}=options;
     if(!playable().includes(player)||!playable().includes(enemy)||!Object.hasOwn(Rules.stages,stage)||!Object.hasOwn(Rules.difficulties,level)||!['versus','training'].includes(mode))return false;
-    if(!images['stage-'+stage]) images['stage-'+stage] = images.stage || images['stage-piazza'] || images['stage-tempesta'] || null;
-    selectedCharacter=player;opponentCharacter=enemy;stageId=stage;difficulty=level;images.stage=images['stage-'+stage];CONFIG.groundY=Rules.stages[stage].groundY;
+    // A remote background must never prevent a battle from starting.
+    selectedCharacter=player;opponentCharacter=enemy;stageId=stage;difficulty=level;
+    images.stage=images['stage-'+stage]||images['stage-piazza']||images['stage-tempesta']||null;
+    CONFIG.groundY=Rules.stages[stage].groundY;
     syncPlayerForm();
     aiEnabled=mode==='versus';match=Rules.create(mode);roundCues.length=0;setMenuOpen(false);resetCombat();warmCutins();
     $('#ai-toggle').checked=aiEnabled;$('#character-select').value=selectedCharacter;document.body.classList.toggle('in-versus',mode==='versus');
@@ -1724,39 +1726,44 @@
   if(F)reset();
   if(window.FRONTEND_ENABLED)setMenuOpen(true);
   resize(); requestAnimationFrame(tick);
-  // J-Fighter Alpha 0.2.2: make boot depend only on essential fighter/stage sprites.
-  // Decorative FX load independently; one missing effect must never block all gameplay.
-  const ESSENTIAL = [
-    ['stage-piazza', 'assets/menu/jf-nib-stage.webp?v=024'],
-    ['stage-tempesta', 'assets/menu/jf-solan-stage.webp?v=024'],
-    ['nib', 'assets/nib/run/sprite-sheet-alpha.webp'],
-    ['solan', 'assets/solan/run/sprite-sheet-alpha.webp']
-  ];
-  // Distinct timeout per image. Missing/slow resources are reported but do not lock the menu.
-  const failures=[];
-  function loadEssential(key,path){
-    return Promise.race([loadImage(key,path,false),new Promise(resolve=>setTimeout(()=>resolve(false),9000))])
-      .then(()=>{if(!images[key])failures.push(path);});
-  }
-  // Both sprites are essential to a full match, but boot is non-blocking if a host cache goes stale.
-  Promise.all(ESSENTIAL.map(([key,path])=>loadEssential(key,path))).then(()=>{
-    images.stage=images['stage-piazza']||images['stage-tempesta']||null;
-    ready=!!window.NIB_MANIFEST&&!!window.SOLAN_MANIFEST&&!!NB&&!!SO&&!!Rules;
-    if (!ready){
-      console.error('[J-Fighter] Required character scripts unavailable');
-      $('#load-message').textContent='Required fighter scripts missing. Check GitHub files.';
-      $('#load-state').classList.add('error');
-      return;
-    }
+  // J-Fighter 0.2.5: readiness means that the engine scripts are available,
+  // never that every (large) image has decoded. No blocking image waits.
+  ready=!!window.NIB_MANIFEST&&!!window.SOLAN_MANIFEST&&!!NB&&!!SO&&!!Rules;
+  if(ready){
     syncPlayerForm();
-    $('#load-state').classList.add('hidden');
-    if(failures.length){console.error('[J-Fighter] Missing images',failures);
-      const warning=document.createElement('div');warning.id='jf-warning';warning.textContent='Some art is missing: '+failures.join(', ');warning.style.cssText='position:fixed;bottom:4px;right:8px;background:#30140d;color:white;font:12px sans-serif;z-index:100000;padding:5px;max-width:70vw;';
-      document.body.appendChild(warning);setTimeout(()=>warning.remove(),13000);
-    }
-    window.FrontEnd?.assetsReady(true);
-    const optional=[['hero','assets/mecha/run/sprite-sheet-alpha.webp'],['drone','assets/ui/drone.png'],['cutin','assets/ui/ultimate-cutin.webp'],...['crescent','roar','impact','sunburst'].map(n=>['fx-solan-'+n,'assets/solan/ui/fx-'+n+'.webp']),...['letter','plane','slip','stamp'].map(n=>['fx-nib-'+n,'assets/nib/ui/fx-'+n+'.webp'])];
-    optional.forEach(([key,path])=>loadImage(key,path,false));
-  }).catch(err=>{console.error('[J-Fighter] Init failure',err);$('#load-message').textContent='Boot failure: '+err.message;$('#load-state').classList.add('error');});
+    $('#load-state')?.classList.add('hidden');
+    window.FrontEnd?.assetsReady?.(true);
+  }else{
+    const issue='Missing engine scripts: '+[
+      !window.NIB_MANIFEST&&'NIB_MANIFEST',!window.SOLAN_MANIFEST&&'SOLAN_MANIFEST',
+      !NB&&'Nib engine',!SO&&'Solan engine',!Rules&&'MatchRules'
+    ].filter(Boolean).join(', ');
+    console.error('[J-Fighter]',issue);
+    $('#load-message').textContent=issue;
+    $('#load-state').classList.add('error');
+  }
+  // Separate image downloads. A failed sprite reports an error; the menu stays interactive.
+  const ESSENTIAL=[
+    ['stage-piazza','assets/menu/jf-nib-stage.webp?v=025'],
+    ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=025'],
+    ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=025'],
+    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=025']
+  ];
+  const faults=[];
+  ESSENTIAL.forEach(([key,path])=>{
+    loadImage(key,path,true).then(ok=>{
+      if(!ok){faults.push(path);console.error('[J-Fighter] Missing resource:',path);}
+      if(key.startsWith('stage-')&&stageId===key.slice(6))images.stage=images[key]||images.stage;
+      if(key===selectedCharacter)syncPlayerForm();
+      if(key==='nib' || key==='solan'){
+        const affected=key===selectedCharacter||key===opponentCharacter;
+        if(affected&&!ok){const load=$('#load-state');load?.classList.remove('hidden');load?.classList.add('error');$('#load-message').textContent='Fighter sprite missing: '+path;}
+      }
+    }).catch(err=>console.error('[J-Fighter] Resource failure:',path,err));
+  });
+  const optional=[['drone','assets/ui/drone.png'],['cutin','assets/ui/ultimate-cutin.webp'],
+    ...['crescent','roar','impact','sunburst'].map(n=>['fx-solan-'+n,'assets/solan/ui/fx-'+n+'.webp']),
+    ...['letter','plane','slip','stamp'].map(n=>['fx-nib-'+n,'assets/nib/ui/fx-'+n+'.webp'])];
+  optional.forEach(([key,path])=>loadImage(key,path,false));
 
 })();
