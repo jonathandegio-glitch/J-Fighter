@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101923"><script>/* Phones/tablets: mark .touch and open the landscape mobile shell (mobile.html). ?touch=1 forces it on desktop, ?touch=0 turns it off. */(()=>{const q=new URLSearchParams(location.search),f=q.get('touch'),t=f?f==='1':matchMedia('(pointer: coarse)').matches||(navigator.maxTouchPoints>0&&/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));if(!t)return;document.documentElement.classList.add('touch');if(window.top===window&&!q.has('embed'))location.replace('mobile.html'+location.search+location.hash);})();</script><title>J-FIGHTER — Alpha 0.2.2</title><link rel="preload" href="assets/fonts/Rajdhani-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="menu.css"><meta name="description" content="J-Fighter Alpha 0.2: Bad Benny e General H.H."></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101923"><script>/* Phones/tablets: mark .touch and open the landscape mobile shell (mobile.html). ?touch=1 forces it on desktop, ?touch=0 turns it off. */(()=>{const q=new URLSearchParams(location.search),f=q.get('touch'),t=f?f==='1':matchMedia('(pointer: coarse)').matches||(navigator.maxTouchPoints>0&&/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));if(!t)return;document.documentElement.classList.add('touch');if(window.top===window&&!q.has('embed'))location.replace('mobile.html'+location.search+location.hash);})();</script><title>J-FIGHTER — Alpha 0.2.3</title><link rel="preload" href="assets/fonts/Rajdhani-Bold.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="menu.css"><meta name="description" content="J-Fighter Alpha 0.2: Bad Benny e General H.H."></head>
 <body><div id="boot" role="status" aria-live="polite"><div class="boot-card"><strong class="boot-logo">J-<br><em>FIGHTER</em></strong><div class="boot-bar"><i></i></div><span class="boot-status">LOADING…</span></div></div><script>
 // J-Fighter 0.2.2: visible startup diagnostics rather than an endless loading screen.
 (function(){
@@ -16,7 +16,7 @@
  window.addEventListener('unhandledrejection',function(e){show('STARTUP PROMISE ERROR: '+(e.reason?.message||String(e.reason)));});
  setTimeout(function(){var screen=document.getElementById('load-state');if(screen&&!screen.classList.contains('hidden')&&!screen.classList.contains('error'))show('STARTUP TIMEOUT: check that all GitHub files are uploaded.');},18000);
 })();
-</script><script src="precache.js"></script><script src="preload.js"></script><main id="game-shell" aria-label="J-Fighter, demo game fighting custom fighting game">
+</script><script src="precache.js"></script><script src="preload.js?v=023"></script><main id="game-shell" aria-label="J-Fighter, demo game fighting custom fighting game">
 <canvas id="arena" tabindex="0" aria-label="Arena pertarungan. WASD bergerak, Spasi menyerang, I O P untuk skill."></canvas><div class="vignette" aria-hidden="true"></div>
 <header class="combat-header">
 <section class="fighter fighter-one" aria-label="Player status">
