@@ -1,0 +1,24 @@
+{
+  "build": "J-FIGHTER Alpha 0.2",
+  "characters": {
+    "nib": "BAD BENNY",
+    "solan": "GENERAL H.H."
+  },
+  "animations": 14,
+  "frames_per_character": 50,
+  "unique_frame_note": "several source poses reused",
+  "stages": [
+    "piazza",
+    "tempesta"
+  ],
+  "verified": [
+    "JavaScript parses",
+    "14x50 atlas manifests",
+    "sprite sheets generated",
+    "required HTML linked files exist"
+  ],
+  "untested": [
+    "interactive match browser run blocked by environment",
+    "mobile touch hardware"
+  ]
+}
