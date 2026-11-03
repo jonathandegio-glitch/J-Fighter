@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const balance = { cooldowns:{skill1:3,skill2:6,ultimate:18}, castTime:.5, roarDamage:16, basicRefund:.05 };
-  const names = ['IRON DISCIPLINE','AIR STRIKE','RALLYING CRY','TOTAL BARRAGE'];
+  const names = ['IRON DISCIPLINE','LUFTWAFFE','REICH RALLY','WELTKRIEG'];
   // Heavy greatsword chain: a little quicker than HALDOR's hammer, with big knockback. Reach sits inside the measured
   // blade tip (149/95/74 px in emitters.json; the cleave ends on the floor close in front of him).
   const combo = [
@@ -18,11 +18,11 @@
   // Sunmane Roar: three roars 0.38 s apart (inside the 0.42 s hurt stun); each sends a tall sound wave both ways along
   // the floor that cannot be jumped (`tall`) and fades after `range` px. A rival inside 480 px takes all three (48);
   // getting farther away than that before the roars dodges them.
-  const roar = { cutinDuration:.78, roars:[.8,1.18,1.56], speed:530, range:650, tall:190, size:240, duration:2.7 };
+  const roar = { cutinDuration:.78, roars:[.8,1.42,2.04], speed:530, range:650, tall:190, size:240, duration:3.15 };
   function move(name,index=1) {
     if(name==='attack')return {name:`attack${index}`,type:'attack',index,...combo[index-1]};
     if(name==='skill1')return {name,type:name,damage:19,duration:.62,knockback:180,projectile:true,speed:610,range:700,hitAt:.58};
-    if(name==='skill2')return {name,type:name,damage:0,duration:.76,buff:true,hitAt:.55};
+    if(name==='skill2')return {name,type:name,damage:20,duration:.76,shockwave:true,speed:820,range:770,knockback:130,hitAt:.55};
     return {name:'ultimate',type:'ultimate',duration:balance.castTime,damage:0,hitAt:1};
   }
   function start(a,name,index=1) {

@@ -17,11 +17,11 @@
   // Special Delivery: three paper-plane parcels leave the satchel 0.38 s apart (inside the 0.42 s hurt stun) and home
   // in on the rival at `speed` px/s, turning at most `turn` rad/s. Each hits once for 16 (48). A late sidestep or jump
   // makes a plane overshoot, and it gives up after `life` s.
-  const delivery = { cutinDuration:.78, releases:[.7,.84,.98,1.12,1.26,1.4,1.54,1.68], speed:1250, turn:0, life:1.1, size:95, duration:2.4 };
+  const delivery = { cutinDuration:.78, releases:[.7,.9,1.1,1.3,1.5,1.7], speed:1250, turn:0, life:1.1, size:95, duration:2.4 };
   function move(name,index=1) {
     if(name==='attack')return {name:`attack${index}`,type:'attack',index,...combo[index-1]};
     if(name==='skill1')return {name,type:name,damage:19,duration:.64,knockback:220,reach:146,dash:610,hitAt:.45};
-    if(name==='skill2')return {name,type:name,damage:0,duration:.7,buff:true,hitAt:.54};
+    if(name==='skill2')return {name,type:name,damage:20,duration:.72,shockwave:true,speed:850,range:760,knockback:120,hitAt:.52};
     return {name:'ultimate',type:'ultimate',duration:balance.castTime,damage:0,hitAt:1};
   }
   function start(a,name,index=1) {

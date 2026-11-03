@@ -670,28 +670,29 @@
     if (p.owner === 'enemy') { if (Math.abs(hero.x - p.x) < p.radius && hero.y > CONFIG.groundY - 150) window.__game.receiveHit(p.damage); }
     else if (Math.abs(dummy.x - p.x) < p.radius && dummy.y > CONFIG.groundY - 150) hitDummy(p.damage, p.knockback, p.color, p.x, p.y, false, true);
   }
-  // SOLAN Sunmane Roar: three roars 0.38 s apart from wherever SOLAN stands; each sends a tall sound wave both ways
-  // along the floor (ground projectiles with `tall`, so a jump does not clear them), 16 each, 48 total, fading after
-  // SO.roar.range px. SOLAN is free after the 0.5 s cast; a rival farther away than the range is safe.
+  // WELTKRIEG: three aircraft converge dynamically onto the rival. Every aircraft produces
+  // one blast (16 damage), giving up to 48 total; attacking from either player or CPU works.
   function startSunroar(actor = hero) {
     const group = { t: 0, owner: actor === hero ? 'player' : 'enemy', facing: actor.facing, roars: 0, phase: 'cutin' };
     if (actor === hero) sunroar = group; else enemySunroar = group;
-    cinematic = .9; announceTimer = 0;
-    startUltimateVoice('solan', actor);
+    cinematic = .9; announceTimer = 0;startUltimateVoice('solan', actor);
   }
   function updateSunroar(dt, s) {
     if (!s) return;
-    const U = SO.roar, a = s.owner === 'enemy' ? dummy : hero;
-    s.t += dt;
-    while (s.roars < U.roars.length && s.t >= U.roars[s.roars]) {
-      const last = s.roars === U.roars.length - 1; s.roars++;
-      effects.push({ type: 'solan-fx', asset: 'solan-sunburst', x: a.x, y: a.y - 110, facing: s.facing, life: .3, maxLife: .3, size: 160 });
-      spawnParticles(a.x, a.y - 95, '#ffd36a', 16, 260); trauma = Math.min(1, trauma + .25); sound('heavy');
-      for (const dir of [-1, 1]) projectiles.push({ x: a.x + dir * 40, y: CONFIG.groundY - 110, vx: dir * U.speed, life: U.range / U.speed, facing: dir, owner: s.owner, damage: SO.balance.roarDamage, knockback: last ? 190 : 50,
-        asset: 'solan-roar', size: U.size, color: '#ffd36a', tall: U.tall, freeze: false });
+    const U=SO.roar, target=s.owner==='enemy'?hero:dummy;
+    s.t+=dt;
+    while(s.roars<U.roars.length && s.t>=U.roars[s.roars]){
+      const i=s.roars++,spread=[-430,430,-260][i], startHeights=[72,118,58];
+      const aimX=clamp(target.x,90,W-90), aimY=clamp(target.y-78,120,CONFIG.groundY-78);
+      const startX=clamp(aimX+spread,50,W-50), startY=startHeights[i]||88;
+      projectiles.push({asset:'jf-diving-aircraft',jfDive:true,x:startX,y:startY,startX,startY,aimX,aimY,progress:0,duration:.72,life:.72,prevX:startX,prevY:startY,angle:0,
+        owner:s.owner,damage:16,knockback:i===2?185:50,facing:spread<0?1:-1,color:'#ffcf77',freeze:false});
+      effects.push({type:'solan-fx',asset:'solan-sunburst',x:startX,y:startY,facing:s.facing,life:.28,maxLife:.28,size:120});sound('cast');
     }
-    s.phase = s.t < U.cutinDuration ? 'cutin' : s.roars < U.roars.length ? 'roaring' : 'fading';
-    if (s.t >= U.duration && !projectiles.some(p => p.asset === 'solan-roar' && p.owner === s.owner)) { if (s.owner === 'enemy') enemySunroar = null; else sunroar = null; }
+    s.phase=s.t<U.cutinDuration?'cutin':s.roars<U.roars.length?'aircraft incoming':'impact';
+    if(s.t>=U.duration&&!projectiles.some(p=>p.jfDive&&p.owner===s.owner)){
+      if(s.owner==='enemy')enemySunroar=null;else sunroar=null;
+    }
   }
   // NIB Special Delivery: three paper-plane parcels leave the satchel 0.38 s apart and home in on the rival (homing
   // projectiles with a limited turn rate, 16 each, 48 total). NIB is free after the 0.5 s cast; a late sidestep or a
@@ -852,6 +853,30 @@
   }
   function updateProjectiles(dt) {
     for (let i = projectiles.length - 1; i >= 0; i--) { const p = projectiles[i], oldX = p.x;
+      if(p.jfDive){
+        const target=p.owner==='enemy'?hero:dummy;
+        p.progress=Math.min(1,p.progress+dt/p.duration);
+        p.aimX+=clamp(target.x-p.aimX,-720*dt,720*dt);
+        p.aimY=(p.aimY??(target.y-75));
+        p.aimY+=clamp((target.y-75)-p.aimY,-360*dt,360*dt);
+        const t=p.progress, ease=t*t*(3-2*t);
+        const prevX=p.x, prevY=p.y;
+        p.x=p.startX+(p.aimX-p.startX)*ease;
+        p.y=p.startY+(p.aimY-p.startY)*ease;
+        const dxAng=p.x-prevX, dyAng=p.y-prevY;
+        if(Math.abs(dxAng)+Math.abs(dyAng)>.001)p.angle=Math.atan2(dyAng,dxAng);
+        p.facing=p.x-oldX>=0?1:-1;
+        if(t>=1){
+          const x=target.x,y=target.y-75;
+          effects.push({type:'solan-fx',asset:'solan-impact',x,y,facing:p.facing,life:.55,maxLife:.55,size:200});
+          effects.push({type:'muzzle',x,y,color:'#ffb45b',life:.28,maxLife:.28,heavy:true});
+          spawnParticles(x,y,'#ffb565',24,250);trauma=Math.min(1,trauma+.24);sound('heavy');
+          if(p.owner==='enemy')window.__game.receiveHit(p.damage,{projectile:true,freeze:false});
+          else hitDummy(p.damage,p.knockback,'#ffca77',x,y,false,false,.6);
+          projectiles.splice(i,1);
+        }
+        continue;
+      }
       // NIB paper planes steer toward the rival's chest, turning at most p.turn rad/s.
       if (p.homing) { const t = p.owner === 'enemy' ? hero : dummy, want = Math.atan2(t.y - 85 - p.y, t.x - p.x), cur = Math.atan2(p.vy, p.vx); let d = want - cur; d = Math.atan2(Math.sin(d), Math.cos(d)); const ang = cur + clamp(d, -p.turn * dt, p.turn * dt); p.vx = Math.cos(ang) * p.speedH; p.vy = Math.sin(ang) * p.speedH; p.facing = p.vx >= 0 ? 1 : -1; }
       // EDDA Stone Skip: the stone falls under its own gravity and hops off the floor p.bounces more times, then sinks.
@@ -1072,14 +1097,20 @@
     if(connected)sound(move.index===3?'heavy':'hit');
   }
   function solanStrike(actor,move) {
-    if(move.buff){actor.jfBuff=6.0;effects.push({type:'solan-fx',asset:'solan-sunburst',x:actor.x,y:actor.y-90,facing:actor.facing,life:.65,maxLife:.65,size:205});spawnParticles(actor.x,actor.y-90,'#e9ca65',30,180);sound('cast');return;}
+    if(move.shockwave){
+      // REICH RALLY: offensive command blast. One hit, 26 damage on a confirmed hit.
+      const x=actor.x+actor.facing*74,y=actor.y-92;
+      projectiles.push({x,y,vx:actor.facing*move.speed,life:move.range/move.speed,facing:actor.facing,owner:actor===dummy?'enemy':'player',damage:move.damage,knockback:move.knockback,asset:'jf-general-rally',size:175,tall:135,color:'#f9c86c',freeze:false});
+      effects.push({type:'solan-fx',asset:'solan-sunburst',x:actor.x,y:actor.y-90,facing:actor.facing,life:.48,maxLife:.48,size:190});
+      spawnParticles(actor.x,actor.y-88,'#ffe19c',24,210);sound('heavy');return;
+    }
     const enemy=actor===dummy,target=enemy?hero:dummy,em=window.SOLAN_METRICS?.emitters?.[move.name];
     const hy=clamp(actor.y+(em?.y??-95),actor.y-190,actor.y-40);
     if(move.projectile){
       // Solar Crescent: a golden crescent wave from the blade edge at chest height, SO.crescent.range px long.
       const x=actor.x+actor.facing*Math.round((em?.x??110)*.7),y=actor.y-95;
       projectiles.push({x,y,vx:actor.facing*move.speed,life:move.range/move.speed,facing:actor.facing,owner:enemy?'enemy':'player',damage:move.damage,knockback:move.knockback,asset:'solan-crescent',size:150,color:'#ffd36a'});
-      spawnParticles(x,y,'#ffd36a',10,160);sound('cast');return;
+      effects.push({type:'solan-fx',asset:'solan-impact',x:x+actor.facing*65,y:y+12,facing:actor.facing,life:.34,maxLife:.34,size:150});spawnParticles(x,y,'#ffd36a',18,220);sound('cast');return;
     }
     let hitX=null;
     if(move.leap){
@@ -1100,10 +1131,16 @@
     if(connected)sound(move.leap||move.index===3?'heavy':'hit');
   }
   function nibStrike(actor,move) {
-    if(move.buff){actor.jfBuff=6.0;effects.push({type:'nib-fx',asset:'nib-stamp',x:actor.x,y:actor.y-90,facing:actor.facing,life:.65,maxLife:.65,size:205});spawnParticles(actor.x,actor.y-85,'#f4c28e',28,150);sound('cast');return;}
+    if(move.shockwave){
+      // NATIONAL ADDRESS: visible pressure wave; it no longer silently buffs with zero damage.
+      const x=actor.x+actor.facing*70,y=actor.y-90;
+      projectiles.push({x,y,vx:actor.facing*move.speed,life:move.range/move.speed,facing:actor.facing,owner:actor===dummy?'enemy':'player',damage:move.damage,knockback:move.knockback,asset:'jf-benny-address',size:160,tall:125,color:'#e8ae80',freeze:false});
+      effects.push({type:'nib-fx',asset:'nib-stamp',x:actor.x,y:actor.y-90,facing:actor.facing,life:.5,maxLife:.5,size:188});
+      spawnParticles(actor.x,actor.y-85,'#f7bf88',28,190);sound('heavy');return;
+    }
     const enemy=actor===dummy,target=enemy?hero:dummy,em=window.NIB_METRICS?.emitters?.[move.name];
     const hy=clamp(actor.y+(em?.y??-80),actor.y-170,actor.y-40);
-    if(move.dash){effects.push({type:'nib-fx',asset:'nib-slip',x:actor.x-actor.facing*50,y:CONFIG.groundY-45,facing:actor.facing,life:.4,maxLife:.4,size:170});dust(actor.x,20);}
+    if(move.dash){effects.push({type:'nib-fx',asset:'nib-slip',x:actor.x-actor.facing*65,y:CONFIG.groundY-50,facing:actor.facing,life:.5,maxLife:.5,size:190});effects.push({type:'shockline',x:actor.x-actor.facing*45,y:actor.y-90,facing:actor.facing,life:.36,maxLife:.36});dust(actor.x,30);}
     if(move.projectile){
       // Express Letter: a sealed letter thrown flat at chest height; the fastest projectile, NB.letter.range px long.
       const x=actor.x+actor.facing*Math.round((em?.x??80)*.8),y=actor.y-90;
@@ -1465,7 +1502,8 @@
     const spriteScale = pose.scale;
     ctx.save(); ctx.translate(Math.round(hero.x), Math.round(hero.y)); ctx.scale(hero.facing * spriteScale, spriteScale); ctx.imageSmoothingEnabled = false;
     if (pose.pivot) { ctx.translate(pose.worldPivot.x, pose.worldPivot.y); ctx.rotate(pose.rotation); ctx.translate(-pose.pivot.x, -pose.pivot.y); }
-    ctx.drawImage(images.hero, r.x, r.y, r.w, r.h, -anchorX, -anchorY, r.w, r.h); ctx.restore();
+    const jfFootOffset = ({ nib: 8, solan: 8 })[selectedCharacter] || 0;
+    ctx.drawImage(images.hero, r.x, r.y, r.w, r.h, -anchorX, -anchorY + jfFootOffset, r.w, r.h); ctx.restore();
     if(delivery && delivery.owner==='player' && delivery.t<1.8)jfDrawMachineGun(hero);
   }
   function drawDummy() {
@@ -1474,7 +1512,8 @@
     if(!m||!img)return;
     const r=m.frame_layout.rows[pose.state][pose.frame];
     ctx.save();ctx.translate(Math.round(dummy.x),Math.round(dummy.y));ctx.scale(dummy.facing||-1,1);ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(img,r.x,r.y,r.w,r.h,-m.cell.width/2,-(m.cell.height-m.cell.safe_margin_y),r.w,r.h);ctx.restore();
+    const jfEnemyFootOffset = ({ nib: 8, solan: 8 })[opponentCharacter] || 0;
+    ctx.drawImage(img,r.x,r.y,r.w,r.h,-m.cell.width/2,-(m.cell.height-m.cell.safe_margin_y)+jfEnemyFootOffset,r.w,r.h);ctx.restore();
     if(enemyDelivery && enemyDelivery.owner==='enemy' && enemyDelivery.t<1.8)jfDrawMachineGun(dummy);
     if(dummy.action && !dummy.action.fired && dummy.action.type!=='ultimate') {
       ctx.save();ctx.strokeStyle='#f0b15e';ctx.lineWidth=2;ctx.globalAlpha=.7;
@@ -1483,6 +1522,21 @@
   }
   function drawEffects() {
     for (const p of projectiles) {
+      if(p.asset==='jf-general-rally'||p.asset==='jf-benny-address'){
+        const gold=p.asset==='jf-general-rally';
+        ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.facing,1);
+        ctx.globalAlpha=.88;ctx.strokeStyle=gold?'#ffd36d':'#f8ae83';ctx.lineWidth=5;
+        for(let j=0;j<3;j++){ctx.beginPath();ctx.ellipse(-j*29,0,31+j*16,64+j*10,0,-Math.PI/2,Math.PI/2);ctx.stroke();}
+        ctx.strokeStyle='#fff5ce';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,50,-1.35,1.35);ctx.stroke();ctx.restore();continue;
+      }
+      if(p.jfDive){
+        ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Number.isFinite(p.angle)?p.angle:Math.atan2(2,p.aimX-p.startX||1));
+        const plane=images['fx-solan-crescent']||images['fx-solan-roar'];
+        if(plane){ctx.imageSmoothingEnabled=false;ctx.drawImage(plane,-70,-39,140,78);}
+        else{ctx.fillStyle='#5b6651';ctx.fillRect(-40,-9,80,18);ctx.fillRect(-7,-38,18,76);}
+        ctx.restore();
+        ctx.save();ctx.strokeStyle='rgba(255,202,124,.68)';ctx.lineWidth=3;ctx.setLineDash([14,12]);ctx.beginPath();ctx.moveTo(p.startX,p.startY);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.restore();continue;
+      }
       if(p.asset && images['fx-'+p.asset]){
         const air=p.asset==='solan-crescent'||p.asset==='solan-roar';
         const gun=p.asset==='nib-plane'||p.asset==='nib-letter';
@@ -1616,8 +1670,8 @@
     if(id==='fenr'){const wolf=form==='wolf';return {name:'FENR',cls:wolf?'WEREWOLF':'DEMI-HUMAN',deck:wolf?'FENR · FERAL':'FENR',title:'AIR COMMAND',portrait:'assets/fenr/ui/portrait-'+(wolf?'wolf':'human')+'.webp',names:F.kits[wolf?'wolf':'human'].names,icons:['basic','skill1','skill2','ultimate'].map((s,i)=>'assets/fenr/ui/icon-'+(i===3?'ultimate':(wolf?'wolf':'human')+'-'+s)+'.webp')};}
     if(id==='cora')return {name:'CORA',cls:'DEMI-HUMAN',deck:'CORA',title:'SKY DANCER',portrait:'assets/cora/ui/portrait.webp',names:C.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/cora/ui/icon-'+s+'.webp')};
     if(id==='edda')return {name:'EDDA',cls:'DEMI-HUMAN',deck:'EDDA',title:'SHELL SAGE',portrait:'assets/edda/ui/portrait.webp',names:ED.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/edda/ui/icon-'+s+'.webp')};
-    if(id==='nib')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'IRON ORDER',portrait:'assets/nib/ui/portrait.webp',names:NB.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/nib/ui/icon-'+s+'.webp?v=027')};
-    if(id==='solan')return {name:'GENERAL H.H.',cls:'GENERAL',deck:'GENERAL H.H.',title:'AIR COMMAND',portrait:'assets/solan/ui/portrait.webp',names:SO.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/solan/ui/icon-'+s+'.webp?v=027')};
+    if(id==='nib')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'IRON ORDER',portrait:'assets/nib/ui/portrait.webp',names:NB.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/nib/ui/icon-'+s+'.webp?v=030')};
+    if(id==='solan')return {name:'GENERAL H.H.',cls:'GENERAL',deck:'GENERAL H.H.',title:'AIR COMMAND',portrait:'assets/solan/ui/portrait.webp',names:SO.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/solan/ui/icon-'+s+'.webp?v=030')};
     if(id==='rhea')return {name:'RHEA',cls:'MECHA',deck:'RHEA',title:'LITTLE ORRERY',portrait:'assets/rhea/ui/portrait.webp',names:RH.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/rhea/ui/icon-'+s+'.webp')};
     if(id==='isolde')return {name:'ISOLDE',cls:'MECHA',deck:'ISOLDE',title:'WHITE STRIDER',portrait:'assets/isolde/ui/portrait.webp',names:IS.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/isolde/ui/icon-'+s+'.webp')};
     if(id==='zanni')return {name:'ZANNI',cls:'MECHA',deck:'ZANNI',title:'CLOCKWORK JESTER',portrait:'assets/zanni/ui/portrait.webp',names:Z.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/zanni/ui/icon-'+s+'.webp')};
@@ -1763,8 +1817,8 @@
   }
   // Separate image downloads. A failed sprite reports an error; the menu stays interactive.
   const ESSENTIAL=[
-    ['stage-piazza','assets/menu/jf-nib-stage.webp?v=027'],
-    ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=027'],
+    ['stage-piazza','assets/menu/jf-nib-stage.webp?v=030'],
+    ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=030'],
     ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=025'],
     ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=025']
   ];
