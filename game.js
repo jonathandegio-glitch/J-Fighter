@@ -1828,8 +1828,8 @@
   const ESSENTIAL=[
     ['stage-piazza','assets/menu/jf-nib-stage.webp?v=0301'],
     ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=0301'],
-    ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=031'],
-    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=031']
+    ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=032'],
+    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=032']
   ];
   const faults=[];
   ESSENTIAL.forEach(([key,path])=>{
