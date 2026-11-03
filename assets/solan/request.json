@@ -1,0 +1,175 @@
+{
+  "character": "solan",
+  "cell": {
+    "width": 448,
+    "height": 288,
+    "anchor_x": 224,
+    "anchor_y": 280,
+    "safe_margin_x": 10,
+    "safe_margin_y": 8
+  },
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "fps": 5,
+      "loop": true,
+      "durations_ms": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    "walk": {
+      "row": 1,
+      "frames": 4,
+      "fps": 10,
+      "loop": true,
+      "durations_ms": [
+        100,
+        100,
+        100,
+        100
+      ]
+    },
+    "run": {
+      "row": 2,
+      "frames": 4,
+      "fps": 13,
+      "loop": true,
+      "durations_ms": [
+        77,
+        77,
+        77,
+        77
+      ]
+    },
+    "jump": {
+      "row": 3,
+      "frames": 1,
+      "fps": 10,
+      "loop": false,
+      "durations_ms": [
+        100
+      ]
+    },
+    "doublejump": {
+      "row": 4,
+      "frames": 1,
+      "fps": 12,
+      "loop": false,
+      "durations_ms": [
+        83
+      ]
+    },
+    "crouch": {
+      "row": 5,
+      "frames": 4,
+      "fps": 8,
+      "loop": false,
+      "durations_ms": [
+        125,
+        125,
+        125,
+        125
+      ]
+    },
+    "attack1": {
+      "row": 6,
+      "frames": 4,
+      "fps": 13,
+      "loop": false,
+      "durations_ms": [
+        77,
+        77,
+        77,
+        77
+      ]
+    },
+    "attack2": {
+      "row": 7,
+      "frames": 4,
+      "fps": 13,
+      "loop": false,
+      "durations_ms": [
+        77,
+        77,
+        77,
+        77
+      ]
+    },
+    "attack3": {
+      "row": 8,
+      "frames": 4,
+      "fps": 11,
+      "loop": false,
+      "durations_ms": [
+        91,
+        91,
+        91,
+        91
+      ]
+    },
+    "skill1": {
+      "row": 9,
+      "frames": 4,
+      "fps": 11,
+      "loop": false,
+      "durations_ms": [
+        91,
+        91,
+        91,
+        91
+      ]
+    },
+    "skill2": {
+      "row": 10,
+      "frames": 4,
+      "fps": 10,
+      "loop": false,
+      "durations_ms": [
+        100,
+        100,
+        100,
+        100
+      ]
+    },
+    "ultimate": {
+      "row": 11,
+      "frames": 4,
+      "fps": 9,
+      "loop": false,
+      "durations_ms": [
+        111,
+        111,
+        111,
+        111
+      ]
+    },
+    "hurt": {
+      "row": 12,
+      "frames": 4,
+      "fps": 9,
+      "loop": false,
+      "durations_ms": [
+        111,
+        111,
+        111,
+        111
+      ]
+    },
+    "down": {
+      "row": 13,
+      "frames": 4,
+      "fps": 7,
+      "loop": false,
+      "durations_ms": [
+        143,
+        143,
+        143,
+        143
+      ]
+    }
+  }
+}
