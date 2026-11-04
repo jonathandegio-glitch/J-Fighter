@@ -1437,7 +1437,12 @@
     else if(name==='recover')index=Math.floor(dummy.stateTime/.4*list.length);
     else index=Math.floor(dummy.stateTime*(m?.animation?.rows?.[name]?.fps||5));
     if(m?.animation?.rows?.[name]?.loop)index%=list.length;
-    return {state:name,frame:clamp(index,0,Math.max(0,list.length-1)),manifest:m};
+    // J-Fighter: the General's illustrated impact strip is incomplete.
+    // Keep the complete first reaction pose during hit-stun instead of cycling
+    // through damaged artwork; the knockback / HP logic remains unchanged.
+    if (opponentCharacter === 'solan' && name === 'hurt') index = 0;
+    if (opponentCharacter === 'solan' && name === 'recover') index = Math.min(1, list.length-1);
+    return {state:name,frame:clamp(Number.isFinite(index)?index:0,0,Math.max(0,list.length-1)),manifest:m};
   }
   function updateVisuals(dt) {
     for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += (p.kind === 'dust' || p.kind==='run-smoke' ? -40 : 680) * dt; p.vx *= Math.exp(-dt * 3); if (p.life <= 0) particles.splice(i, 1); }
@@ -1500,16 +1505,16 @@
     shadow(hero.x, CONFIG.groundY, Math.max(19, (selectedCharacter === 'mira' ? 63 : selectedCharacter === 'haldor' ? 58 : 52) - (CONFIG.groundY - hero.y) * .07), .20);
     if (!images.hero || !manifest) return;
     let list = frames(hero.state); if (!list.length) list = frames('idle'); if (!list.length) return;
-    const pose = heroPose(), index = pose.frame;
+    const pose = heroPose(), index = (selectedCharacter === 'solan' && hero.state === 'hurt') ? 0 : pose.frame;
     const r = list[index] || frames('idle')[0]; if (!r || !Number.isFinite(r.x) || !Number.isFinite(r.y)) return; const cw = manifest.cell?.width || manifest.cell?.w || r.w, ch = manifest.cell?.height || manifest.cell?.h || r.h;
     const anchorX = manifest.cell?.anchor_x ?? cw / 2, anchorY = manifest.cell?.anchor_y ?? ch - (manifest.cell?.safe_margin_y || 0);
-    const spriteScale = pose.scale;
+    const spriteScale = pose.scale * ((selectedCharacter === 'solan' || selectedCharacter === 'bad-benny') ? 1.12 : 1);
     ctx.save(); ctx.translate(Math.round(hero.x), Math.round(hero.y)); ctx.scale(hero.facing * spriteScale, spriteScale); ctx.imageSmoothingEnabled = false;
     if (pose.pivot) { ctx.translate(pose.worldPivot.x, pose.worldPivot.y); ctx.rotate(pose.rotation); ctx.translate(-pose.pivot.x, -pose.pivot.y); }
     const jfFootOffset = ({ nib: 0, solan: 0 })[selectedCharacter] || 0;
     ctx.drawImage(images.hero, r.x, r.y, r.w, r.h, -anchorX, -anchorY + jfFootOffset, r.w, r.h);
     // Bad Benny's Ultimate: weapon is attached to his forward hand and moves with the fighter.
-    if((selectedCharacter==='nib'||selectedCharacter==='bad-benny') && (hero.ultimateActive || hero.ultimateState || (hero.action||'').includes('ultimate'))){
+    if((selectedCharacter==='nib'||selectedCharacter==='bad-benny') && (hero.action?.type === 'ultimate' || (delivery && delivery.owner === 'player'))){
       const hx=8,hy=-104;
       ctx.save();ctx.translate(hx,hy);
       ctx.fillStyle='#2b302e';ctx.fillRect(-8,-7,70,11);ctx.fillStyle='#151a1b';ctx.fillRect(18,4,10,24);
@@ -1524,7 +1529,7 @@
     shadow(dummy.x,CONFIG.groundY,dummy.state==='down'?65:opponentCharacter==='mira'?61:opponentCharacter==='haldor'?55:43,.20);
     if(!m||!img)return;
     const r=m.frame_layout?.rows?.[pose.state]?.[pose.frame] || m.frame_layout?.rows?.idle?.[0]; if(!r || !Number.isFinite(r.x) || !Number.isFinite(r.y))return;
-    ctx.save();ctx.translate(Math.round(dummy.x),Math.round(dummy.y));ctx.scale(dummy.facing||-1,1);ctx.imageSmoothingEnabled=false;
+    ctx.save();ctx.translate(Math.round(dummy.x),Math.round(dummy.y));const jfSpriteScale = (opponentCharacter === 'solan' || opponentCharacter === 'bad-benny') ? 1.12 : 1; ctx.scale((dummy.facing||-1)*jfSpriteScale,jfSpriteScale);ctx.imageSmoothingEnabled=false;
     const jfEnemyFootOffset = ({ nib: 0, solan: 0 })[opponentCharacter] || 0;
     ctx.drawImage(img,r.x,r.y,r.w,r.h,-m.cell.width/2,-(m.cell.height-m.cell.safe_margin_y)+jfEnemyFootOffset,r.w,r.h);ctx.restore();
     if(enemyDelivery && enemyDelivery.owner==='enemy' && enemyDelivery.t<1.8)jfDrawMachineGun(dummy);
@@ -1770,7 +1775,7 @@
   }
   // Cut-in art per fighter. Only the two fighters of the current fight are warmed (at start/select), so a banner never waits
   // for its image; until the right image is decoded the art stays hidden (see updateHud) instead of showing the last one.
-  const CUTIN_ART={'bad-benny':'assets/bad-benny/ui/cutin.webp',fenr:'assets/fenr/ui/cutin.webp',mira:'assets/mira/ui/cutin.webp',cora:'assets/cora/ui/cutin.webp',naja:'assets/naja/ui/cutin.webp',haldor:'assets/haldor/ui/cutin.webp',zanni:'assets/zanni/ui/cutin.webp',isolde:'assets/isolde/ui/cutin.webp',rhea:'assets/rhea/ui/cutin.webp',solan:'assets/solan/ui/cutin.webp',nib:'assets/nib/ui/cutin.webp',edda:'assets/edda/ui/cutin.webp',arco:'assets/ui/ultimate-cutin.webp'};
+  const CUTIN_ART={'bad-benny':'assets/bad-benny/ui/cutin.webp',fenr:'assets/fenr/ui/cutin.webp',mira:'assets/mira/ui/cutin.webp',cora:'assets/cora/ui/cutin.webp',naja:'assets/naja/ui/cutin.webp',haldor:'assets/haldor/ui/cutin.webp',zanni:'assets/zanni/ui/cutin.webp',isolde:'assets/isolde/ui/cutin.webp',rhea:'assets/rhea/ui/cutin.webp',solan:'assets/solan/ui/cutin.webp?v=042',nib:'assets/nib/ui/cutin.webp',edda:'assets/edda/ui/cutin.webp',arco:'assets/ui/ultimate-cutin.webp'};
   let cutinWarm=[];
   function warmCutins(){cutinWarm=[...new Set([selectedCharacter,opponentCharacter])].map(id=>CUTIN_ART[id]).filter(Boolean).map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});}
   function setPaused(value) { paused = value; clearInput(); syncUltimateVoice(); $('#pause-btn').textContent = value ? '▶' : 'Ⅱ'; const panel = $('#pause-panel'); if (value && !panel.open) panel.showModal(); if (!value && panel.open) panel.close(); if (!value) canvas.focus({ preventScroll: true }); }
@@ -1834,8 +1839,8 @@
     ['stage-piazza','assets/menu/jf-nib-stage.webp?v=0301'],
     ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=0301'],
     ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=032'],
-    ['bad-benny','assets/bad-benny/run/sprite-sheet-alpha.webp?v=041'],
-    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=041']
+    ['bad-benny','assets/bad-benny/run/sprite-sheet-alpha.webp?v=042'],
+    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=042']
   ];
   const faults=[];
   ESSENTIAL.forEach(([key,path])=>{
