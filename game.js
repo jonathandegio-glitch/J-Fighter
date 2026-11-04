@@ -1683,7 +1683,7 @@
     if(id==='fenr'){const wolf=form==='wolf';return {name:'FENR',cls:wolf?'WEREWOLF':'DEMI-HUMAN',deck:wolf?'FENR · FERAL':'FENR',title:'AIR COMMAND',portrait:'assets/fenr/ui/portrait-'+(wolf?'wolf':'human')+'.webp',names:F.kits[wolf?'wolf':'human'].names,icons:['basic','skill1','skill2','ultimate'].map((s,i)=>'assets/fenr/ui/icon-'+(i===3?'ultimate':(wolf?'wolf':'human')+'-'+s)+'.webp')};}
     if(id==='cora')return {name:'CORA',cls:'DEMI-HUMAN',deck:'CORA',title:'SKY DANCER',portrait:'assets/cora/ui/portrait.webp',names:C.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/cora/ui/icon-'+s+'.webp')};
     if(id==='edda')return {name:'EDDA',cls:'DEMI-HUMAN',deck:'EDDA',title:'SHELL SAGE',portrait:'assets/edda/ui/portrait.webp',names:ED.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/edda/ui/icon-'+s+'.webp')};
-    if(id==='bad-benny')return {name:'BAD BENNY (NEW)',cls:'COMMANDER',deck:'BAD BENNY (NEW)',title:'ANIMATION TEST',portrait:'assets/bad-benny/ui/portrait.webp',names:BB.names,icons:['basic','skill1','skill2','ultimate'].map(x=>'assets/bad-benny/ui/icon-'+x+'.webp')};
+    if(id==='bad-benny')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'COMMANDER',portrait:'assets/bad-benny/ui/portrait.webp',names:BB.names,icons:['basic','skill1','skill2','ultimate'].map(x=>'assets/bad-benny/ui/icon-'+x+'.webp')};
     if(id==='nib')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'IRON ORDER',portrait:'assets/nib/ui/portrait.webp',names:NB.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/nib/ui/icon-'+s+'.webp?v=030')};
     if(id==='solan')return {name:'GENERAL H.H.',cls:'GENERAL',deck:'GENERAL H.H.',title:'AIR COMMAND',portrait:'assets/solan/ui/portrait.webp',names:SO.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/solan/ui/icon-'+s+'.webp?v=030')};
     if(id==='rhea')return {name:'RHEA',cls:'MECHA',deck:'RHEA',title:'LITTLE ORRERY',portrait:'assets/rhea/ui/portrait.webp',names:RH.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/rhea/ui/icon-'+s+'.webp')};
@@ -1834,8 +1834,8 @@
     ['stage-piazza','assets/menu/jf-nib-stage.webp?v=0301'],
     ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=0301'],
     ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=032'],
-    ['bad-benny','assets/bad-benny/run/sprite-sheet-alpha.webp?v=040'],
-    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=032']
+    ['bad-benny','assets/bad-benny/run/sprite-sheet-alpha.webp?v=041'],
+    ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=041']
   ];
   const faults=[];
   ESSENTIAL.forEach(([key,path])=>{
