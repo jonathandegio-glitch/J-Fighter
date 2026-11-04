@@ -16,9 +16,9 @@
   };
   const cooldownMax = { skill1:BALANCE.skill1.cooldown, skill2:BALANCE.skill2.cooldown, ultimate:BALANCE.ultimate.cooldown };
   const skillNames = { skill1: 'SPECIAL 1', skill2: 'SPECIAL 2', ultimate: 'ULTIMATE' };
-  const images = {}, F = window.Fenr, M = window.Mira && window.MIRA_MANIFEST ? window.Mira : null, C = window.Cora && window.CORA_MANIFEST ? window.Cora : null, N = window.Naja && window.NAJA_MANIFEST ? window.Naja : null, HD = window.Haldor && window.HALDOR_MANIFEST ? window.Haldor : null, Z = window.Zanni && window.ZANNI_MANIFEST ? window.Zanni : null, IS = window.Isolde && window.ISOLDE_MANIFEST ? window.Isolde : null, RH = window.Rhea && window.RHEA_MANIFEST ? window.Rhea : null, SO = window.Solan && window.SOLAN_MANIFEST ? window.Solan : null, NB = window.Nib && window.NIB_MANIFEST ? window.Nib : null, ED = window.Edda && window.EDDA_MANIFEST ? window.Edda : null;
+  const images = {}, F = window.Fenr, M = window.Mira && window.MIRA_MANIFEST ? window.Mira : null, C = window.Cora && window.CORA_MANIFEST ? window.Cora : null, N = window.Naja && window.NAJA_MANIFEST ? window.Naja : null, HD = window.Haldor && window.HALDOR_MANIFEST ? window.Haldor : null, Z = window.Zanni && window.ZANNI_MANIFEST ? window.Zanni : null, IS = window.Isolde && window.ISOLDE_MANIFEST ? window.Isolde : null, RH = window.Rhea && window.RHEA_MANIFEST ? window.Rhea : null, SO = window.Solan && window.SOLAN_MANIFEST ? window.Solan : null, NB = window.Nib && window.NIB_MANIFEST ? window.Nib : null, BB = window.BadBenny && window.BAD_BENNY_MANIFEST && window.BAD_BENNY_METRICS ? window.BadBenny : null, ED = window.Edda && window.EDDA_MANIFEST ? window.Edda : null;
   // Kits that share one start/move/refund contract (mira.js, cora.js, naja.js, haldor.js, zanni.js, isolde.js, rhea.js, solan.js, nib.js, edda.js).
-  const KITS = { ...(M ? { mira: M } : {}), ...(C ? { cora: C } : {}), ...(N ? { naja: N } : {}), ...(HD ? { haldor: HD } : {}), ...(Z ? { zanni: Z } : {}), ...(IS ? { isolde: IS } : {}), ...(RH ? { rhea: RH } : {}), ...(SO ? { solan: SO } : {}), ...(NB ? { nib: NB } : {}), ...(ED ? { edda: ED } : {}) };
+  const KITS = { ...(M ? { mira: M } : {}), ...(C ? { cora: C } : {}), ...(N ? { naja: N } : {}), ...(HD ? { haldor: HD } : {}), ...(Z ? { zanni: Z } : {}), ...(IS ? { isolde: IS } : {}), ...(RH ? { rhea: RH } : {}), ...(SO ? { solan: SO } : {}), ...(NB ? { nib: NB } : {}), ...(BB ? { 'bad-benny': BB } : {}), ...(ED ? { edda: ED } : {}) };
   let manifest = window.MECHA_MANIFEST || window.SPRITE_MANIFEST || null, metrics = window.MECHA_METRICS || null;
   let selectedCharacter = 'nib', aiEnabled = !!F, fenrCutin = null, hudIdentity = '';
   const Rules = window.MatchRules;
@@ -365,6 +365,7 @@
     if(selectedCharacter==='isolde'){isoldeStrike(hero,IS.move('attack',index));return;}
     if(selectedCharacter==='rhea'){rheaStrike(hero,RH.move('attack',index));return;}
     if(selectedCharacter==='solan'){solanStrike(hero,SO.move('attack',index));return;}
+    if(selectedCharacter==='bad-benny'){nibStrike(hero,BB.move('attack',index));return;}
     if(selectedCharacter==='nib'){nibStrike(hero,NB.move('attack',index));return;}
     if(selectedCharacter==='edda'){eddaStrike(hero,ED.move('attack',index));return;}
     const reach = attackRange(index), dx = (dummy.x - hero.x) * hero.facing, y = emitter(`attack${index}`).y;
@@ -388,6 +389,7 @@
     if(selectedCharacter==='isolde'){isoldeStrike(hero,action);return;}
     if(selectedCharacter==='rhea'){rheaStrike(hero,action);return;}
     if(selectedCharacter==='solan'){solanStrike(hero,action);return;}
+    if(selectedCharacter==='bad-benny'){nibStrike(hero,action);return;}
     if(selectedCharacter==='nib'){nibStrike(hero,action);return;}
     if(selectedCharacter==='edda'){eddaStrike(hero,action);return;}
     const name = action.type, origin = emitter(name);
@@ -492,7 +494,7 @@
     s.phase = s.t < P.cutinDuration ? 'cutin' : s.exploded < s.rockets.length ? 'barrage' : 'clearing';
     if (s.t >= P.duration) { if (s.owner === 'enemy') enemyParade = null; else parade = null; }
   }
-  function startSummon(actor) { const id = actor === hero ? selectedCharacter : opponentCharacter; if (id === 'cora') startMurmuration(actor); else if (id === 'naja') startSerpent(actor); else if (id === 'haldor') startQuake(actor); else if (id === 'zanni') startFinale(actor); else if (id === 'isolde') startSkyfall(actor); else if (id === 'rhea') startOrrery(actor); else if (id === 'solan') startSunroar(actor); else if (id === 'nib') startDelivery(actor); else if (id === 'edda') startTortoise(actor); else startRocketParade(actor); }
+  function startSummon(actor) { const id = actor === hero ? selectedCharacter : opponentCharacter; if (id === 'cora') startMurmuration(actor); else if (id === 'naja') startSerpent(actor); else if (id === 'haldor') startQuake(actor); else if (id === 'zanni') startFinale(actor); else if (id === 'isolde') startSkyfall(actor); else if (id === 'rhea') startOrrery(actor); else if (id === 'solan') startSunroar(actor); else if (id === 'nib' || id === 'bad-benny') startDelivery(actor); else if (id === 'edda') startTortoise(actor); else startRocketParade(actor); }
   // CORA Night Murmuration: three raven passes sweep forward from behind her wings at three heights,
   // one 16-damage hit each (48 total), no global hit-stop. A pass hits once, when its lead raven crosses the target.
   function startMurmuration(actor = hero) {
@@ -805,7 +807,7 @@
     if(hero.hp<=0) { hero.koTime=Math.max(0,hero.koTime-dt); state('down'); if(!hero.koTime&&match?.mode!=='versus') {hero.hp=BALANCE.heroMax;hero.invuln=.9;state(hero.grounded?'idle':'jump');} }
     if (hero.action) {
       const a = hero.action; a.t += dt; state(a.name);
-      if((selectedCharacter==='fenr'||selectedCharacter==='mira'||selectedCharacter==='haldor'||selectedCharacter==='isolde'||selectedCharacter==='solan'||selectedCharacter==='nib')&&a.dash&&a.t>a.duration*.2&&a.t<a.duration*.6)hero.vx=hero.facing*a.dash;
+      if((selectedCharacter==='fenr'||selectedCharacter==='mira'||selectedCharacter==='haldor'||selectedCharacter==='isolde'||selectedCharacter==='solan'||selectedCharacter==='nib'||selectedCharacter==='bad-benny')&&a.dash&&a.t>a.duration*.2&&a.t<a.duration*.6)hero.vx=hero.facing*a.dash;
       if (a.type !== 'ultimate' && !a.fired && a.t >= a.duration * (a.hitAt || (a.type === 'skill2' ? .53 : .5))) { a.fired = true; if (a.type === 'attack') meleeHit(a.index); else fireSkill(a); }
       if (a.fired && a.cancelInto && hero.action === a) { const into = a.cancelInto; hero.action = null; state(hero.grounded ? 'idle' : 'jump'); if (into === 'jump') jump(); }
       if (a.t >= a.duration || (a.type === 'skill1' && a.fired)) { const queued = a.queued && a.index < 3, remaining = Math.max(0, a.queued - 1); const next = (a.index || 0) + 1; hero.action = null; if (queued) { startAttack(next); hero.action.queued = remaining; } else state(hero.grounded ? 'idle' : 'jump'); }
@@ -914,6 +916,7 @@
     else if(selectedCharacter==='naja') {manifest=window.NAJA_MANIFEST;metrics=window.NAJA_METRICS;images.hero=images.naja;Object.assign(cooldownMax,N.balance.cooldowns);}
     else if(selectedCharacter==='haldor') {manifest=window.HALDOR_MANIFEST;metrics=window.HALDOR_METRICS;images.hero=images.haldor;Object.assign(cooldownMax,HD.balance.cooldowns);}
     else if(selectedCharacter==='edda') {manifest=window.EDDA_MANIFEST;metrics=window.EDDA_METRICS;images.hero=images.edda;Object.assign(cooldownMax,ED.balance.cooldowns);}
+    else if(selectedCharacter==='bad-benny') {manifest=window.BAD_BENNY_MANIFEST;metrics=window.BAD_BENNY_METRICS;images.hero=images['bad-benny'];Object.assign(cooldownMax,BB.balance.cooldowns);}
     else if(selectedCharacter==='nib') {manifest=window.NIB_MANIFEST;metrics=window.NIB_METRICS;images.hero=images.nib;Object.assign(cooldownMax,NB.balance.cooldowns);}
     else if(selectedCharacter==='solan') {manifest=window.SOLAN_MANIFEST;metrics=window.SOLAN_METRICS;images.hero=images.solan;Object.assign(cooldownMax,SO.balance.cooldowns);}
     else if(selectedCharacter==='rhea') {manifest=window.RHEA_MANIFEST;metrics=window.RHEA_METRICS;images.hero=images.rhea;Object.assign(cooldownMax,RH.balance.cooldowns);}
@@ -1202,6 +1205,7 @@
     if(opponentCharacter==='isolde'){isoldeStrike(dummy,a);return;}
     if(opponentCharacter==='rhea'){rheaStrike(dummy,a);return;}
     if(opponentCharacter==='solan'){solanStrike(dummy,a);return;}
+    if(opponentCharacter==='bad-benny'){nibStrike(dummy,a);return;}
     if(opponentCharacter==='nib'){nibStrike(dummy,a);return;}
     if(opponentCharacter==='edda'){eddaStrike(dummy,a);return;}
     const em=window.MECHA_METRICS.emitters[a.name],x=dummy.x+dummy.facing*em.x,y=dummy.y+em.y,dx=(hero.x-dummy.x)*dummy.facing;
@@ -1422,7 +1426,7 @@
     dummy.aiThink = pick || dist < 260 ? Math.min(P.reaction, 1 / 60) : P.reaction * .5;
   }
   function opponentPose() {
-    const m=opponentCharacter==='arco'?window.MECHA_MANIFEST:opponentCharacter==='mira'?window.MIRA_MANIFEST:opponentCharacter==='cora'?window.CORA_MANIFEST:opponentCharacter==='naja'?window.NAJA_MANIFEST:opponentCharacter==='haldor'?window.HALDOR_MANIFEST:opponentCharacter==='zanni'?window.ZANNI_MANIFEST:opponentCharacter==='isolde'?window.ISOLDE_MANIFEST:opponentCharacter==='rhea'?window.RHEA_MANIFEST:opponentCharacter==='solan'?window.SOLAN_MANIFEST:opponentCharacter==='nib'?window.NIB_MANIFEST:opponentCharacter==='edda'?window.EDDA_MANIFEST:dummy.form==='wolf'?window.FENR_WOLF_MANIFEST:window.FENR_HUMAN_MANIFEST;
+    const m=opponentCharacter==='arco'?window.MECHA_MANIFEST:opponentCharacter==='mira'?window.MIRA_MANIFEST:opponentCharacter==='cora'?window.CORA_MANIFEST:opponentCharacter==='naja'?window.NAJA_MANIFEST:opponentCharacter==='haldor'?window.HALDOR_MANIFEST:opponentCharacter==='zanni'?window.ZANNI_MANIFEST:opponentCharacter==='isolde'?window.ISOLDE_MANIFEST:opponentCharacter==='rhea'?window.RHEA_MANIFEST:opponentCharacter==='solan'?window.SOLAN_MANIFEST:opponentCharacter==='bad-benny'?window.BAD_BENNY_MANIFEST:opponentCharacter==='nib'?window.NIB_MANIFEST:opponentCharacter==='edda'?window.EDDA_MANIFEST:dummy.form==='wolf'?window.FENR_WOLF_MANIFEST:window.FENR_HUMAN_MANIFEST;
     const name=m?.frame_layout?.rows?.[dummy.state]?dummy.state:'idle',list=m?.frame_layout?.rows?.[name]||[];
     let index=0;
     // Projectile casts that release at 50% show wind-up -> thrust -> full extension, like the player's pose.
@@ -1505,7 +1509,7 @@
     const jfFootOffset = ({ nib: 0, solan: 0 })[selectedCharacter] || 0;
     ctx.drawImage(images.hero, r.x, r.y, r.w, r.h, -anchorX, -anchorY + jfFootOffset, r.w, r.h);
     // Bad Benny's Ultimate: weapon is attached to his forward hand and moves with the fighter.
-    if(selectedCharacter==='nib' && (hero.ultimateActive || hero.ultimateState || (hero.action||'').includes('ultimate'))){
+    if((selectedCharacter==='nib'||selectedCharacter==='bad-benny') && (hero.ultimateActive || hero.ultimateState || (hero.action||'').includes('ultimate'))){
       const hx=8,hy=-104;
       ctx.save();ctx.translate(hx,hy);
       ctx.fillStyle='#2b302e';ctx.fillRect(-8,-7,70,11);ctx.fillStyle='#151a1b';ctx.fillRect(18,4,10,24);
@@ -1679,6 +1683,7 @@
     if(id==='fenr'){const wolf=form==='wolf';return {name:'FENR',cls:wolf?'WEREWOLF':'DEMI-HUMAN',deck:wolf?'FENR · FERAL':'FENR',title:'AIR COMMAND',portrait:'assets/fenr/ui/portrait-'+(wolf?'wolf':'human')+'.webp',names:F.kits[wolf?'wolf':'human'].names,icons:['basic','skill1','skill2','ultimate'].map((s,i)=>'assets/fenr/ui/icon-'+(i===3?'ultimate':(wolf?'wolf':'human')+'-'+s)+'.webp')};}
     if(id==='cora')return {name:'CORA',cls:'DEMI-HUMAN',deck:'CORA',title:'SKY DANCER',portrait:'assets/cora/ui/portrait.webp',names:C.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/cora/ui/icon-'+s+'.webp')};
     if(id==='edda')return {name:'EDDA',cls:'DEMI-HUMAN',deck:'EDDA',title:'SHELL SAGE',portrait:'assets/edda/ui/portrait.webp',names:ED.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/edda/ui/icon-'+s+'.webp')};
+    if(id==='bad-benny')return {name:'BAD BENNY (NEW)',cls:'COMMANDER',deck:'BAD BENNY (NEW)',title:'ANIMATION TEST',portrait:'assets/bad-benny/ui/portrait.webp',names:BB.names,icons:['basic','skill1','skill2','ultimate'].map(x=>'assets/bad-benny/ui/icon-'+x+'.webp')};
     if(id==='nib')return {name:'BAD BENNY',cls:'COMMANDER',deck:'BAD BENNY',title:'IRON ORDER',portrait:'assets/nib/ui/portrait.webp',names:NB.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/nib/ui/icon-'+s+'.webp?v=030')};
     if(id==='solan')return {name:'GENERAL H.H.',cls:'GENERAL',deck:'GENERAL H.H.',title:'AIR COMMAND',portrait:'assets/solan/ui/portrait.webp',names:SO.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/solan/ui/icon-'+s+'.webp?v=030')};
     if(id==='rhea')return {name:'RHEA',cls:'MECHA',deck:'RHEA',title:'LITTLE ORRERY',portrait:'assets/rhea/ui/portrait.webp',names:RH.names,icons:['basic','skill1','skill2','ultimate'].map(s=>'assets/rhea/ui/icon-'+s+'.webp')};
@@ -1765,7 +1770,7 @@
   }
   // Cut-in art per fighter. Only the two fighters of the current fight are warmed (at start/select), so a banner never waits
   // for its image; until the right image is decoded the art stays hidden (see updateHud) instead of showing the last one.
-  const CUTIN_ART={fenr:'assets/fenr/ui/cutin.webp',mira:'assets/mira/ui/cutin.webp',cora:'assets/cora/ui/cutin.webp',naja:'assets/naja/ui/cutin.webp',haldor:'assets/haldor/ui/cutin.webp',zanni:'assets/zanni/ui/cutin.webp',isolde:'assets/isolde/ui/cutin.webp',rhea:'assets/rhea/ui/cutin.webp',solan:'assets/solan/ui/cutin.webp',nib:'assets/nib/ui/cutin.webp',edda:'assets/edda/ui/cutin.webp',arco:'assets/ui/ultimate-cutin.webp'};
+  const CUTIN_ART={'bad-benny':'assets/bad-benny/ui/cutin.webp',fenr:'assets/fenr/ui/cutin.webp',mira:'assets/mira/ui/cutin.webp',cora:'assets/cora/ui/cutin.webp',naja:'assets/naja/ui/cutin.webp',haldor:'assets/haldor/ui/cutin.webp',zanni:'assets/zanni/ui/cutin.webp',isolde:'assets/isolde/ui/cutin.webp',rhea:'assets/rhea/ui/cutin.webp',solan:'assets/solan/ui/cutin.webp',nib:'assets/nib/ui/cutin.webp',edda:'assets/edda/ui/cutin.webp',arco:'assets/ui/ultimate-cutin.webp'};
   let cutinWarm=[];
   function warmCutins(){cutinWarm=[...new Set([selectedCharacter,opponentCharacter])].map(id=>CUTIN_ART[id]).filter(Boolean).map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});}
   function setPaused(value) { paused = value; clearInput(); syncUltimateVoice(); $('#pause-btn').textContent = value ? '▶' : 'Ⅱ'; const panel = $('#pause-panel'); if (value && !panel.open) panel.showModal(); if (!value && panel.open) panel.close(); if (!value) canvas.focus({ preventScroll: true }); }
@@ -1829,6 +1834,7 @@
     ['stage-piazza','assets/menu/jf-nib-stage.webp?v=0301'],
     ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=0301'],
     ['nib','assets/nib/run/sprite-sheet-alpha.webp?v=032'],
+    ['bad-benny','assets/bad-benny/run/sprite-sheet-alpha.webp?v=040'],
     ['solan','assets/solan/run/sprite-sheet-alpha.webp?v=032']
   ];
   const faults=[];
@@ -1837,7 +1843,7 @@
       if(!ok){faults.push(path);console.error('[J-Fighter] Missing resource:',path);}
       if(key.startsWith('stage-')&&stageId===key.slice(6))images.stage=images[key]||images.stage;
       if(key===selectedCharacter)syncPlayerForm();
-      if(key==='nib' || key==='solan'){
+      if(key==='nib' || key==='solan' || key==='bad-benny'){
         const affected=key===selectedCharacter||key===opponentCharacter;
         if(affected&&!ok){const load=$('#load-state');load?.classList.remove('hidden');load?.classList.add('error');$('#load-message').textContent='Fighter sprite missing: '+path;}
       }

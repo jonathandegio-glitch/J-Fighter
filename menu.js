@@ -3,7 +3,8 @@
   'use strict';
   const root=document.querySelector('#front-menu'),game=window.__game;
   const fighters={
-    nib:{name:'BAD BENNY',tag:'THE COMMANDER',race:'SATIRICAL FIGHTER',portrait:'assets/nib/ui/portrait.webp',art:'assets/menu/nib-select.webp',detail:'A relentless forward-pressure fighter.',basic:'IRON COMMAND',ultimate:'DUCE BOMBER',style:'Rushdown / carica / buff / bombardamento',color:'#e0b283'},
+    'bad-benny':{name:'BAD BENNY (NEW)',tag:'INDEPENDENT CHARACTER TEST',race:'NEW SPRITES · 54 FRAMES',portrait:'assets/bad-benny/ui/portrait.webp',art:'assets/menu/bad-benny-select.webp',detail:'New independently animated character. Compare with Legacy.',basic:'IRON COMMAND',ultimate:'DUCE BOMBER',style:'Rushdown / new animation prototype',color:'#e0b283'},
+    nib:{name:'BAD BENNY LEGACY',tag:'THE COMMANDER',race:'SATIRICAL FIGHTER',portrait:'assets/nib/ui/portrait.webp',art:'assets/menu/nib-select.webp',detail:'A relentless forward-pressure fighter.',basic:'IRON COMMAND',ultimate:'DUCE BOMBER',style:'Rushdown / carica / buff / bombardamento',color:'#e0b283'},
     solan:{name:'GENERAL H.H.',tag:'THE GENERAL',race:'SATIRICAL FIGHTER',portrait:'assets/solan/ui/portrait.webp',art:'assets/menu/solan-select.webp',detail:'Controls range and calls in air strikes.',basic:'IRON DISCIPLINE',ultimate:'TOTAL BARRAGE',style:'Zoner / raid / buff / raffica',color:'#bdc47c'}
   };
   // Showcase fighters (assets/showcase/showcase.js) fill roster slots with avatar and art; they cannot be confirmed yet.
@@ -26,7 +27,7 @@
   const roster=[...opened,...Array.from({length:0},(_,i)=>'locked-'+i)];
   // lockIn: the pending step change while a confirmed fighter flashes 3 times (PICK_FLASH s each); input waits for it.
   const PICK_FLASH=.3;let lockIn=null,lockTicks=[];
-  let screen='home',step=0,mode='versus',player='nib',enemy='solan',hover='nib',stage='piazza',level='medium',result=null,interacted=false,lastSound=0;
+  let screen='home',step=0,mode='versus',player='bad-benny',enemy='solan',hover='bad-benny',stage='piazza',level='medium',result=null,interacted=false,lastSound=0;
   const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
   let backgroundEnabled=false,backgroundVideo=null,videoPlayToken=0;
   const backgroundToggle=document.querySelector('#menu-video-toggle');
@@ -88,7 +89,7 @@
     sfx('pick',true);game.announceSelection(hover);root.dataset.picking='true';
     root.querySelector(`[data-fighter="${hover}"]`)?.classList.add('picked');root.querySelector(step===0?'#player-preview':'#enemy-preview')?.classList.add('picked');
     lockTicks=[1,2].map(i=>setTimeout(()=>sfx('blink',true),i*PICK_FLASH*1000));
-    lockIn=setTimeout(()=>{lockIn=null;delete root.dataset.picking;if(step===0){player=hover;step=1;hover=player==='nib'?'solan':'nib';}else{enemy=hover;screen='arena';step=2;}render();},3*PICK_FLASH*1000);
+    lockIn=setTimeout(()=>{lockIn=null;delete root.dataset.picking;if(step===0){player=hover;step=1;hover=player==='solan'?'bad-benny':'solan';}else{enemy=hover;screen='arena';step=2;}render();},3*PICK_FLASH*1000);
   }
   function back(){if(lockIn)return;game.stopAnnouncer();sfx('back',true);if(screen==='arena'){screen='select';step=1;hover=enemy;}else if(screen==='select'&&step===1){step=0;hover=player;}else screen='home';render();}
   function start(){try{if(game.startMatch({player,enemy,stage,level,mode})){document.querySelector('#arena').focus();}else{const el=root.querySelector('#setup-error');if(el)el.textContent='Unable to start match. Check fighter assets and reload.';sfx('locked',true);}}catch(err){console.error('[J-Fighter] Match start failure',err);const el=root.querySelector('#setup-error');if(el)el.textContent='MATCH ERROR: '+(err.message||String(err));}}
