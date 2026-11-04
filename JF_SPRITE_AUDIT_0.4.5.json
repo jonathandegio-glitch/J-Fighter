@@ -1,0 +1,664 @@
+{
+  "bad-benny": {
+    "changed_frames": 54,
+    "total_removed_pixels": 178,
+    "total_added_pixels": 16260,
+    "frames": [
+      {
+        "state": "idle",
+        "frame": 0,
+        "removed": 0,
+        "added": 360
+      },
+      {
+        "state": "idle",
+        "frame": 1,
+        "removed": 0,
+        "added": 347
+      },
+      {
+        "state": "idle",
+        "frame": 2,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "idle",
+        "frame": 3,
+        "removed": 3,
+        "added": 381
+      },
+      {
+        "state": "walk",
+        "frame": 0,
+        "removed": 0,
+        "added": 342
+      },
+      {
+        "state": "walk",
+        "frame": 1,
+        "removed": 0,
+        "added": 335
+      },
+      {
+        "state": "walk",
+        "frame": 2,
+        "removed": 0,
+        "added": 365
+      },
+      {
+        "state": "walk",
+        "frame": 3,
+        "removed": 0,
+        "added": 357
+      },
+      {
+        "state": "run",
+        "frame": 0,
+        "removed": 0,
+        "added": 307
+      },
+      {
+        "state": "run",
+        "frame": 1,
+        "removed": 0,
+        "added": 240
+      },
+      {
+        "state": "run",
+        "frame": 2,
+        "removed": 0,
+        "added": 260
+      },
+      {
+        "state": "run",
+        "frame": 3,
+        "removed": 0,
+        "added": 240
+      },
+      {
+        "state": "jump",
+        "frame": 0,
+        "removed": 26,
+        "added": 322
+      },
+      {
+        "state": "doublejump",
+        "frame": 0,
+        "removed": 0,
+        "added": 218
+      },
+      {
+        "state": "crouch",
+        "frame": 0,
+        "removed": 0,
+        "added": 206
+      },
+      {
+        "state": "crouch",
+        "frame": 1,
+        "removed": 0,
+        "added": 237
+      },
+      {
+        "state": "crouch",
+        "frame": 2,
+        "removed": 0,
+        "added": 179
+      },
+      {
+        "state": "crouch",
+        "frame": 3,
+        "removed": 0,
+        "added": 237
+      },
+      {
+        "state": "attack1",
+        "frame": 0,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "attack1",
+        "frame": 1,
+        "removed": 5,
+        "added": 371
+      },
+      {
+        "state": "attack1",
+        "frame": 2,
+        "removed": 0,
+        "added": 320
+      },
+      {
+        "state": "attack1",
+        "frame": 3,
+        "removed": 40,
+        "added": 356
+      },
+      {
+        "state": "attack2",
+        "frame": 0,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "attack2",
+        "frame": 1,
+        "removed": 1,
+        "added": 366
+      },
+      {
+        "state": "attack2",
+        "frame": 2,
+        "removed": 15,
+        "added": 261
+      },
+      {
+        "state": "attack2",
+        "frame": 3,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "attack3",
+        "frame": 0,
+        "removed": 2,
+        "added": 276
+      },
+      {
+        "state": "attack3",
+        "frame": 1,
+        "removed": 0,
+        "added": 195
+      },
+      {
+        "state": "attack3",
+        "frame": 2,
+        "removed": 0,
+        "added": 376
+      },
+      {
+        "state": "attack3",
+        "frame": 3,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "skill1",
+        "frame": 0,
+        "removed": 0,
+        "added": 307
+      },
+      {
+        "state": "skill1",
+        "frame": 1,
+        "removed": 0,
+        "added": 240
+      },
+      {
+        "state": "skill1",
+        "frame": 2,
+        "removed": 0,
+        "added": 260
+      },
+      {
+        "state": "skill1",
+        "frame": 3,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "skill2",
+        "frame": 0,
+        "removed": 0,
+        "added": 360
+      },
+      {
+        "state": "skill2",
+        "frame": 1,
+        "removed": 1,
+        "added": 366
+      },
+      {
+        "state": "skill2",
+        "frame": 2,
+        "removed": 15,
+        "added": 261
+      },
+      {
+        "state": "skill2",
+        "frame": 3,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "ultimate",
+        "frame": 0,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "ultimate",
+        "frame": 1,
+        "removed": 1,
+        "added": 366
+      },
+      {
+        "state": "ultimate",
+        "frame": 2,
+        "removed": 15,
+        "added": 261
+      },
+      {
+        "state": "ultimate",
+        "frame": 3,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "hurt",
+        "frame": 0,
+        "removed": 0,
+        "added": 354
+      },
+      {
+        "state": "hurt",
+        "frame": 1,
+        "removed": 24,
+        "added": 283
+      },
+      {
+        "state": "hurt",
+        "frame": 2,
+        "removed": 3,
+        "added": 288
+      },
+      {
+        "state": "hurt",
+        "frame": 3,
+        "removed": 0,
+        "added": 206
+      },
+      {
+        "state": "down",
+        "frame": 0,
+        "removed": 24,
+        "added": 283
+      },
+      {
+        "state": "down",
+        "frame": 1,
+        "removed": 3,
+        "added": 288
+      },
+      {
+        "state": "down",
+        "frame": 2,
+        "removed": 0,
+        "added": 179
+      },
+      {
+        "state": "down",
+        "frame": 3,
+        "removed": 0,
+        "added": 206
+      },
+      {
+        "state": "recover",
+        "frame": 0,
+        "removed": 0,
+        "added": 179
+      },
+      {
+        "state": "recover",
+        "frame": 1,
+        "removed": 0,
+        "added": 237
+      },
+      {
+        "state": "recover",
+        "frame": 2,
+        "removed": 0,
+        "added": 342
+      },
+      {
+        "state": "recover",
+        "frame": 3,
+        "removed": 0,
+        "added": 354
+      }
+    ]
+  },
+  "general-hh": {
+    "changed_frames": 54,
+    "total_removed_pixels": 125,
+    "total_added_pixels": 17294,
+    "frames": [
+      {
+        "state": "idle",
+        "frame": 0,
+        "removed": 0,
+        "added": 329
+      },
+      {
+        "state": "idle",
+        "frame": 1,
+        "removed": 0,
+        "added": 361
+      },
+      {
+        "state": "idle",
+        "frame": 2,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "idle",
+        "frame": 3,
+        "removed": 0,
+        "added": 359
+      },
+      {
+        "state": "walk",
+        "frame": 0,
+        "removed": 1,
+        "added": 339
+      },
+      {
+        "state": "walk",
+        "frame": 1,
+        "removed": 1,
+        "added": 345
+      },
+      {
+        "state": "walk",
+        "frame": 2,
+        "removed": 0,
+        "added": 362
+      },
+      {
+        "state": "walk",
+        "frame": 3,
+        "removed": 0,
+        "added": 361
+      },
+      {
+        "state": "run",
+        "frame": 0,
+        "removed": 2,
+        "added": 314
+      },
+      {
+        "state": "run",
+        "frame": 1,
+        "removed": 0,
+        "added": 306
+      },
+      {
+        "state": "run",
+        "frame": 2,
+        "removed": 7,
+        "added": 265
+      },
+      {
+        "state": "run",
+        "frame": 3,
+        "removed": 0,
+        "added": 306
+      },
+      {
+        "state": "jump",
+        "frame": 0,
+        "removed": 3,
+        "added": 326
+      },
+      {
+        "state": "doublejump",
+        "frame": 0,
+        "removed": 2,
+        "added": 263
+      },
+      {
+        "state": "crouch",
+        "frame": 0,
+        "removed": 0,
+        "added": 285
+      },
+      {
+        "state": "crouch",
+        "frame": 1,
+        "removed": 0,
+        "added": 245
+      },
+      {
+        "state": "crouch",
+        "frame": 2,
+        "removed": 0,
+        "added": 248
+      },
+      {
+        "state": "crouch",
+        "frame": 3,
+        "removed": 0,
+        "added": 245
+      },
+      {
+        "state": "attack1",
+        "frame": 0,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "attack1",
+        "frame": 1,
+        "removed": 0,
+        "added": 337
+      },
+      {
+        "state": "attack1",
+        "frame": 2,
+        "removed": 1,
+        "added": 330
+      },
+      {
+        "state": "attack1",
+        "frame": 3,
+        "removed": 32,
+        "added": 361
+      },
+      {
+        "state": "attack2",
+        "frame": 0,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "attack2",
+        "frame": 1,
+        "removed": 0,
+        "added": 388
+      },
+      {
+        "state": "attack2",
+        "frame": 2,
+        "removed": 0,
+        "added": 336
+      },
+      {
+        "state": "attack2",
+        "frame": 3,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "attack3",
+        "frame": 0,
+        "removed": 0,
+        "added": 290
+      },
+      {
+        "state": "attack3",
+        "frame": 1,
+        "removed": 0,
+        "added": 228
+      },
+      {
+        "state": "attack3",
+        "frame": 2,
+        "removed": 0,
+        "added": 203
+      },
+      {
+        "state": "attack3",
+        "frame": 3,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "skill1",
+        "frame": 0,
+        "removed": 2,
+        "added": 314
+      },
+      {
+        "state": "skill1",
+        "frame": 1,
+        "removed": 0,
+        "added": 306
+      },
+      {
+        "state": "skill1",
+        "frame": 2,
+        "removed": 7,
+        "added": 265
+      },
+      {
+        "state": "skill1",
+        "frame": 3,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "skill2",
+        "frame": 0,
+        "removed": 0,
+        "added": 329
+      },
+      {
+        "state": "skill2",
+        "frame": 1,
+        "removed": 0,
+        "added": 388
+      },
+      {
+        "state": "skill2",
+        "frame": 2,
+        "removed": 0,
+        "added": 336
+      },
+      {
+        "state": "skill2",
+        "frame": 3,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "ultimate",
+        "frame": 0,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "ultimate",
+        "frame": 1,
+        "removed": 0,
+        "added": 388
+      },
+      {
+        "state": "ultimate",
+        "frame": 2,
+        "removed": 0,
+        "added": 336
+      },
+      {
+        "state": "ultimate",
+        "frame": 3,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "hurt",
+        "frame": 0,
+        "removed": 0,
+        "added": 372
+      },
+      {
+        "state": "hurt",
+        "frame": 1,
+        "removed": 0,
+        "added": 267
+      },
+      {
+        "state": "hurt",
+        "frame": 2,
+        "removed": 33,
+        "added": 312
+      },
+      {
+        "state": "hurt",
+        "frame": 3,
+        "removed": 0,
+        "added": 285
+      },
+      {
+        "state": "down",
+        "frame": 0,
+        "removed": 0,
+        "added": 267
+      },
+      {
+        "state": "down",
+        "frame": 1,
+        "removed": 33,
+        "added": 312
+      },
+      {
+        "state": "down",
+        "frame": 2,
+        "removed": 0,
+        "added": 248
+      },
+      {
+        "state": "down",
+        "frame": 3,
+        "removed": 0,
+        "added": 285
+      },
+      {
+        "state": "recover",
+        "frame": 0,
+        "removed": 0,
+        "added": 248
+      },
+      {
+        "state": "recover",
+        "frame": 1,
+        "removed": 0,
+        "added": 245
+      },
+      {
+        "state": "recover",
+        "frame": 2,
+        "removed": 1,
+        "added": 339
+      },
+      {
+        "state": "recover",
+        "frame": 3,
+        "removed": 0,
+        "added": 372
+      }
+    ]
+  }
+}

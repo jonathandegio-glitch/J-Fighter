@@ -1436,8 +1436,8 @@
     // J-Fighter: the General's illustrated impact strip is incomplete.
     // Keep the complete first reaction pose during hit-stun instead of cycling
     // through damaged artwork; the knockback / HP logic remains unchanged.
-    if (opponentCharacter === 'general-hh' && name === 'hurt') index = 0;
-    if (opponentCharacter === 'general-hh' && name === 'recover') index = Math.min(1, list.length-1);
+    // General H.H.: play the full four-frame hurt sequence instead of holding frame 0.
+    // General H.H. recover also follows the standard four-frame native animation.
     return {state:name,frame:clamp(Number.isFinite(index)?index:0,0,Math.max(0,list.length-1)),manifest:m};
   }
   function updateVisuals(dt) {
@@ -1501,7 +1501,7 @@
     shadow(hero.x, CONFIG.groundY, Math.max(19, (selectedCharacter === 'mira' ? 63 : selectedCharacter === 'haldor' ? 58 : 52) - (CONFIG.groundY - hero.y) * .07), .20);
     if (!images.hero || !manifest) return;
     let list = frames(hero.state); if (!list.length) list = frames('idle'); if (!list.length) return;
-    const pose = heroPose(), index = (selectedCharacter === 'general-hh' && hero.state === 'hurt') ? 0 : pose.frame;
+    const pose = heroPose(), index = pose.frame;
     const r = list[index] || frames('idle')[0]; if (!r || !Number.isFinite(r.x) || !Number.isFinite(r.y)) return; const cw = manifest.cell?.width || manifest.cell?.w || r.w, ch = manifest.cell?.height || manifest.cell?.h || r.h;
     const anchorX = manifest.cell?.anchor_x ?? cw / 2, anchorY = manifest.cell?.anchor_y ?? ch - (manifest.cell?.safe_margin_y || 0);
     const spriteScale = pose.scale * ((selectedCharacter === 'general-hh' || selectedCharacter === 'bad-benny') ? 1.12 : 1);
@@ -1770,7 +1770,7 @@
   }
   // Cut-in art per fighter. Only the two fighters of the current fight are warmed (at start/select), so a banner never waits
   // for its image; until the right image is decoded the art stays hidden (see updateHud) instead of showing the last one.
-  const CUTIN_ART={'bad-benny':'assets/bad-benny/ui/cutin.webp',fenr:'assets/fenr/ui/cutin.webp',mira:'assets/mira/ui/cutin.webp',cora:'assets/cora/ui/cutin.webp',naja:'assets/naja/ui/cutin.webp',haldor:'assets/haldor/ui/cutin.webp',zanni:'assets/zanni/ui/cutin.webp',isolde:'assets/isolde/ui/cutin.webp',rhea:'assets/rhea/ui/cutin.webp','general-hh':'assets/general-hh/ui/cutin.webp?v=043',edda:'assets/edda/ui/cutin.webp',arco:'assets/ui/ultimate-cutin.webp'};
+  const CUTIN_ART={'bad-benny':'assets/bad-benny/ui/cutin.webp',fenr:'assets/fenr/ui/cutin.webp',mira:'assets/mira/ui/cutin.webp',cora:'assets/cora/ui/cutin.webp',naja:'assets/naja/ui/cutin.webp',haldor:'assets/haldor/ui/cutin.webp',zanni:'assets/zanni/ui/cutin.webp',isolde:'assets/isolde/ui/cutin.webp',rhea:'assets/rhea/ui/cutin.webp','general-hh':'assets/general-hh/ui/cutin.webp?v=045',edda:'assets/edda/ui/cutin.webp',arco:'assets/ui/ultimate-cutin.webp'};
   let cutinWarm=[];
   function warmCutins(){cutinWarm=[...new Set([selectedCharacter,opponentCharacter])].map(id=>CUTIN_ART[id]).filter(Boolean).map(src=>{const im=new Image();im.decoding='async';im.src=src;return im;});}
   function setPaused(value) { paused = value; clearInput(); syncUltimateVoice(); $('#pause-btn').textContent = value ? '▶' : 'Ⅱ'; const panel = $('#pause-panel'); if (value && !panel.open) panel.showModal(); if (!value && panel.open) panel.close(); if (!value) canvas.focus({ preventScroll: true }); }
@@ -1835,8 +1835,8 @@
   const ESSENTIAL=[
     ['stage-piazza','assets/menu/jf-nib-stage.webp?v=0301'],
     ['stage-tempesta','assets/menu/jf-solan-stage.webp?v=0301'],
-    ['bad-benny','assets/bad-benny/run/sprite-sheet-alpha.webp?v=043'],
-    ['general-hh','assets/general-hh/run/sprite-sheet-alpha.webp?v=043']
+    ['bad-benny','assets/bad-benny/run/sprite-sheet-alpha.webp?v=045'],
+    ['general-hh','assets/general-hh/run/sprite-sheet-alpha.webp?v=045']
   ];
   const faults=[];
   ESSENTIAL.forEach(([key,path])=>{
@@ -1851,8 +1851,8 @@
     }).catch(err=>console.error('[J-Fighter] Resource failure:',path,err));
   });
   const optional=[['drone','assets/ui/drone.png'],['cutin','assets/ui/ultimate-cutin.webp'],
-    ...['crescent','roar','impact','sunburst'].map(n=>['fx-solan-'+n,'assets/general-hh/ui/fx-'+n+'.webp?v=043']),
-    ...['letter','plane','slip','stamp','gun'].map(n=>['fx-nib-'+n,'assets/bad-benny/ui/fx-'+n+'.webp?v=043'])];
+    ...['crescent','roar','impact','sunburst'].map(n=>['fx-solan-'+n,'assets/general-hh/ui/fx-'+n+'.webp?v=045']),
+    ...['letter','plane','slip','stamp','gun'].map(n=>['fx-nib-'+n,'assets/bad-benny/ui/fx-'+n+'.webp?v=045'])];
   optional.forEach(([key,path])=>loadImage(key,path,false));
 
 })();
